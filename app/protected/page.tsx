@@ -1,0 +1,202 @@
+"use client";
+
+import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import Sidebar from "../components/Sidebar";
+import Toast from "../components/Toast";
+import { useToast } from "../hooks/useToast";
+
+export default function ProtectedPage() {
+  const [apiKey, setApiKey] = useState<string>("");
+  const [isValidating, setIsValidating] = useState(true);
+  const [isValid, setIsValid] = useState<boolean | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const router = useRouter();
+  const { toast, showSuccess, showError, hideToast } = useToast();
+  const hasValidated = useRef(false);
+
+  useEffect(() => {
+    // Prevent duplicate validation calls
+    if (hasValidated.current) {
+      return;
+    }
+
+    // Get API key from sessionStorage
+    const keyToValidate = sessionStorage.getItem("apiKeyToValidate");
+    
+    if (!keyToValidate) {
+      // No API key provided, redirect to playground
+      router.push("/playground");
+      return;
+    }
+
+    hasValidated.current = true;
+    setApiKey(keyToValidate);
+    validateApiKey(keyToValidate);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const validateApiKey = async (key: string) => {
+    try {
+      setIsValidating(true);
+      
+      // Validate the API key using the dedicated validate endpoint
+      const response = await fetch("/api/keys/validate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ key }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to validate API key");
+      }
+
+      const result = await response.json();
+      
+      setIsValid(result.valid);
+      
+      if (result.valid) {
+        showSuccess("Valid API key, /protected can be accessed");
+      } else {
+        showError("Invalid API key");
+      }
+
+      // Clear the sessionStorage after validation
+      sessionStorage.removeItem("apiKeyToValidate");
+    } catch (error) {
+      console.error("Error validating API key:", error);
+      setIsValid(false);
+      showError("Invalid API key");
+      sessionStorage.removeItem("apiKeyToValidate");
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-white flex">
+      <Sidebar isOpen={sidebarOpen} />
+      {/* Overlay for mobile */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "lg:ml-64" : "ml-0"}`}>
+        {/* Toggle Button */}
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className={`fixed top-4 z-50 p-2 bg-white rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition-all duration-300 ${
+            sidebarOpen ? "left-[260px]" : "left-4"
+          }`}
+        >
+          <svg
+            className="w-5 h-5 text-gray-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d={sidebarOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+            />
+          </svg>
+        </button>
+        
+        <main className="p-8 pt-20">
+          <div className="max-w-2xl mx-auto">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Protected Page</h1>
+            <p className="text-gray-600 mb-8">
+              This page validates your API key before allowing access.
+            </p>
+
+            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+              {isValidating ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <p className="text-gray-600">Validating API key...</p>
+                  </div>
+                </div>
+              ) : isValid ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg
+                      className="w-8 h-8 text-green-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+                  <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                    Access Granted
+                  </h2>
+                  <p className="text-gray-600 mb-6">
+                    Your API key is valid. You can now access protected resources.
+                  </p>
+                  <button
+                    onClick={() => router.push("/playground")}
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Try Another Key
+                  </button>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg
+                      className="w-8 h-8 text-red-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </div>
+                  <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                    Access Denied
+                  </h2>
+                  <p className="text-gray-600 mb-6">
+                    The provided API key is invalid. Please check your key and try again.
+                  </p>
+                  <button
+                    onClick={() => router.push("/playground")}
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </main>
+      </div>
+
+      {/* Toast Notification */}
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
+    </div>
+  );
+}
+
