@@ -5,7 +5,7 @@ import { supabase } from "../../../lib/supabaseClient";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { key } = body;
+    const key = body.key || body.apiKey;
 
     if (!key) {
       return NextResponse.json(
