@@ -29,7 +29,7 @@ export function useToast() {
 
   const hideToast = useCallback(() => {
     setToast((prev) => ({ ...prev, isVisible: false }));
-  });
+  }, []);
 
   const showSuccess = useCallback(
     (message: string) => showToast(message, "success"),
