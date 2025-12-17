@@ -74,22 +74,28 @@ export async function POST(request: NextRequest) {
 
     // Fetch README content
     const readmeContent = await getReadmeContent(githubUrl);
-    console.log(readmeContent);
+    
+    if (!readmeContent) {
+      return NextResponse.json(
+        { error: "Could not fetch README content from the GitHub repository", valid: false },
+        { status: 404 }
+      );
+    }
 
-    // TODO: Add GitHub summarization logic here
-    // For now, return success response
+    // Return a simple response with the README content
     return NextResponse.json({
       valid: true,
-      message: "GitHub summarization completed",
-      // Add your GitHub summarization response here
+      summary: "GitHub repository README content retrieved successfully.",
+      readmeContent: readmeContent.substring(0, 1000) // Return first 1000 characters
     });
   } catch (error: any) {
-    console.error("Error in github-summarizer:", error);
+    // Return a generic error message
+    const errorMessage = error?.message || "Unknown error";
     return NextResponse.json(
       { 
         valid: false,
         error: "Failed to process request",
-        details: error?.message || "Unknown error"
+        details: errorMessage
       },
       { status: 500 }
     );
@@ -132,4 +138,5 @@ async function getReadmeContent(githubUrl: string): Promise<string | null> {
     return null;
   }
 }
+
 
