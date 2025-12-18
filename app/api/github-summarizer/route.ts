@@ -74,6 +74,7 @@ export async function POST(request: NextRequest) {
 
     // Fetch README content
     const readmeContent = await getReadmeContent(githubUrl);
+    console.log(readmeContent);
     
     if (!readmeContent) {
       return NextResponse.json(
