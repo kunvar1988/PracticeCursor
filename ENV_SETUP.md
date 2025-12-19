@@ -63,6 +63,10 @@ OPENAI_API_KEY=sk-proj-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 - Replace `sk-your-actual-openai-api-key-here` with your actual API key
 - The API key should start with `sk-` for OpenAI keys
 
+## Deployment
+
+For setting up environment variables on your deployment platform (Vercel, Netlify, Railway, etc.), see [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed platform-specific instructions.
+
 ## Troubleshooting
 
 If you're still seeing errors after setting up the environment variable:

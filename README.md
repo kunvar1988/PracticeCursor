@@ -15,6 +15,8 @@ Before running the development server, you need to set up your environment varia
 
 See [ENV_SETUP.md](./ENV_SETUP.md) for detailed instructions.
 
+**Quick check:** Run `npm run check-env` to verify all environment variables are set.
+
 ### 2. Run the Development Server
 
 First, run the development server:
@@ -48,4 +50,16 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Quick Deployment Guide
+
+📖 **Quick Start:** See [DEPLOYMENT_QUICK_START.md](./DEPLOYMENT_QUICK_START.md) for a fast setup guide.
+
+📚 **Full Guide:** See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions on setting up environment variables for:
+- Vercel (recommended)
+- Netlify
+- Railway
+- AWS
+- Docker
+- Generic servers
+
+**Important:** Don't forget to set up your environment variables in your deployment platform! See the deployment guides above.
