@@ -96,8 +96,21 @@ export async function POST(request: NextRequest) {
       ...result
     });
   } catch (error: any) {
-    // Return a generic error message
+    // Return a more specific error message
     const errorMessage = error?.message || "Unknown error";
+    
+    // Check if it's an OpenAI API key error
+    if (errorMessage.includes("OPENAI_API_KEY") || errorMessage.includes("Missing credentials")) {
+      return NextResponse.json(
+        { 
+          valid: false,
+          error: "OpenAI API key not configured",
+          details: "Please set the 'OPENAI_API_KEY' environment variable in your .env.local file. See ENV_SETUP.md for instructions."
+        },
+        { status: 500 }
+      );
+    }
+    
     return NextResponse.json(
       { 
         valid: false,
