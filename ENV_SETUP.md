@@ -6,12 +6,18 @@ To run this application, you need to set up the following environment variables:
 
 ### 1. Create `.env.local` file
 
-Create a file named `.env.local` in the root of the `practicecursor` directory.
+**Option A (Recommended):** Copy the example file:
+```bash
+cp .env.example .env.local
+```
 
-### 2. Add OpenAI API Key
+**Option B:** Create a file named `.env.local` in the root of the `practicecursor` directory manually.
 
-Add the following line to your `.env.local` file:
+### 2. Add Required Environment Variables
 
+Fill in the actual values in your `.env.local` file. You need to add:
+
+#### OpenAI API Key
 ```
 OPENAI_API_KEY=sk-your-actual-openai-api-key-here
 ```
@@ -21,6 +27,18 @@ OPENAI_API_KEY=sk-your-actual-openai-api-key-here
 2. Sign in or create an account
 3. Click "Create new secret key"
 4. Copy the key and paste it in your `.env.local` file
+
+#### Supabase Configuration
+```
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+**To get your Supabase credentials:**
+1. Go to your Supabase project dashboard
+2. Navigate to Settings > API
+3. Copy the Project URL and anon/public key
+4. Paste them in your `.env.local` file
 
 ### 3. Restart Development Server
 
