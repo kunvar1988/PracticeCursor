@@ -1,7 +1,6 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { z } from "zod";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { StructuredOutputParser } from "@langchain/core/output_parsers";
 
 // Define schema for the structured output
 const repoSummarySchema = z.object({
@@ -9,14 +8,7 @@ const repoSummarySchema = z.object({
   cool_facts: z.array(z.string()).describe("List of cool or interesting facts about the repository"),
 });
 
-// Create the output parser from Langchain-JS
-const outputParser = StructuredOutputParser.fromZodSchema(repoSummarySchema);
-
-// Get format instructions from the parser and escape curly braces for template
-// Langchain interprets { } as template variables, so we need to escape them as {{ }}
-const formatInstructions = outputParser.getFormatInstructions().replace(/\{/g, "{{").replace(/\}/g, "}}");
-
-// Create the prompt template with format instructions included directly
+// Create the prompt template
 const prompt = ChatPromptTemplate.fromMessages([
   [
     "system",
@@ -27,8 +19,6 @@ const prompt = ChatPromptTemplate.fromMessages([
       "Your response should contain:",
       "- A concise summary of the repository",
       "- A list of cool or interesting facts as a bullet list about the repo, such as unique features, technologies used, notable design decisions, or fun insights.",
-      "Format the output as JSON matching the following schema:",
-      formatInstructions,
     ].join("\n"),
   ],
   ["human", "{readmeContent}"],
@@ -39,12 +29,15 @@ if (!process.env.OPENAI_API_KEY) {
   throw new Error("Missing credentials. Please pass an 'apiKey', or set the 'OPENAI_API_KEY' environment variable.");
 }
 
-// Instantiate the OpenAI chat model (can substitute model name as needed)
+// Instantiate the OpenAI chat model
 const llm = new ChatOpenAI({
   model: "gpt-3.5-turbo", // or "gpt-4" etc.
   temperature: 0,
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Create the chain without function calling, using output parser instead
-export const summarizeRepoChain = prompt.pipe(llm).pipe(outputParser);
+// Bind StructuredOutput to the model using withStructuredOutput
+const structuredLlm = llm.withStructuredOutput(repoSummarySchema);
+
+// Create the chain with structured output bound to the model
+export const summarizeRepoChain = prompt.pipe(structuredLlm);
