@@ -38,6 +38,7 @@ const prompt = ChatPromptTemplate.fromMessages([
 const llm = new ChatOpenAI({
   model: "gpt-3.5-turbo", // or "gpt-4" etc.
   temperature: 0,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 // Create the chain without function calling, using output parser instead
