@@ -12,8 +12,9 @@ const repoSummarySchema = z.object({
 // Create the output parser from Langchain-JS
 const outputParser = StructuredOutputParser.fromZodSchema(repoSummarySchema);
 
-// Get format instructions from the parser
-const formatInstructions = outputParser.getFormatInstructions();
+// Get format instructions from the parser and escape curly braces for template
+// Langchain interprets { } as template variables, so we need to escape them as {{ }}
+const formatInstructions = outputParser.getFormatInstructions().replace(/\{/g, "{{").replace(/\}/g, "}}");
 
 // Create the prompt template with format instructions included directly
 const prompt = ChatPromptTemplate.fromMessages([
