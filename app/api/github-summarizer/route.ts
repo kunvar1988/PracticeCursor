@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "../../lib/supabaseClient";
+import { summarizeRepoChain } from "./chain";
+
 
 // POST - GitHub Summarizer endpoint with API key validation
 export async function POST(request: NextRequest) {
@@ -83,11 +85,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Return a simple response with the README content
+    // Use the chain to summarize the repository
+    const result = await summarizeRepoChain.invoke({
+      readmeContent: readmeContent,
+    });
+
+    // Return the summarized result
     return NextResponse.json({
       valid: true,
-      summary: "GitHub repository README content retrieved successfully.",
-      readmeContent: readmeContent.substring(0, 1000) // Return first 1000 characters
+      ...result
     });
   } catch (error: any) {
     // Return a generic error message
