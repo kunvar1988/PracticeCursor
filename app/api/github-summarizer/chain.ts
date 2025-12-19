@@ -41,4 +41,3 @@ const llm = new ChatOpenAI({
 
 // Create the chain without function calling, using output parser instead
 export const summarizeRepoChain = prompt.pipe(llm).pipe(outputParser);
-
