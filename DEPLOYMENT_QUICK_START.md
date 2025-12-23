@@ -61,6 +61,9 @@ Before deploying, make sure you have:
 Before deploying, test that everything works:
 
 ```bash
+# Run comprehensive diagnostic check
+npm run diagnose
+
 # Check environment variables
 npm run check-env
 
@@ -71,11 +74,14 @@ npm run build
 npm start
 ```
 
+**💡 Tip:** The `diagnose` command checks all environment variables, dependencies, and configuration issues that could cause deployment failures.
+
 ---
 
 ## 📚 Need More Details?
 
 - **Deployment failed?** See [VERCEL_DEPLOYMENT_FIX.md](./VERCEL_DEPLOYMENT_FIX.md) for troubleshooting
+- **Can't read Vercel logs?** See [VERCEL_LOG_ANALYSIS.md](./VERCEL_LOG_ANALYSIS.md) for log analysis guide
 - **Full deployment guide:** See [DEPLOYMENT.md](./DEPLOYMENT.md)
 - **Local setup:** See [ENV_SETUP.md](./ENV_SETUP.md)
 - **Supabase setup:** See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)

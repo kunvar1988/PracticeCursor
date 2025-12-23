@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "check-env": "node scripts/check-env.js"
+    "check-env": "node scripts/check-env.js",
+    "diagnose": "node scripts/diagnose-deployment.js"
   },
   "dependencies": {
     "@auth/core": "^0.34.3",

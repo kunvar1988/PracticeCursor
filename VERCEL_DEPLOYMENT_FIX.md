@@ -16,6 +16,10 @@ Common error messages you might see:
 - `Invalid redirect URI`
 - `Environment variable not found`
 
+**📖 Need help reading logs?** See [VERCEL_LOG_ANALYSIS.md](./VERCEL_LOG_ANALYSIS.md) for a comprehensive guide on analyzing Vercel deployment logs.
+
+**🔍 Quick Diagnostic:** Run `npm run diagnose` locally to check for common issues before deploying.
+
 ## Step 2: Add Missing Environment Variables
 
 Your deployment is likely failing because **NextAuth environment variables are missing**. 
