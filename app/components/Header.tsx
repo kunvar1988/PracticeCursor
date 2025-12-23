@@ -1,11 +1,22 @@
 "use client";
 
+import Link from "next/link";
+
 export default function Header() {
   return (
     <div className="mb-6">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-gray-400 mb-1">Pages / Overview</p>
+          <div className="flex items-center gap-2 mb-1">
+            <Link
+              href="/"
+              className="text-sm text-blue-600 hover:text-blue-700 hover:underline"
+            >
+              Home
+            </Link>
+            <span className="text-sm text-gray-400">/</span>
+            <p className="text-sm text-gray-400">Pages / Overview</p>
+          </div>
           <h1 className="text-4xl font-bold text-gray-900">Overview</h1>
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 rounded-full">

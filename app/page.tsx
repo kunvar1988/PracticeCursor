@@ -1,84 +1,161 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 export default function Home() {
+  const { data: session } = useSession();
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <Link
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-blue-600 px-5 text-white transition-colors hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 md:w-[158px]"
-            href="/dashboards"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="h-5 w-5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"
-              />
-            </svg>
-            Dashboard
-          </Link>
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+    <div className="min-h-screen bg-gradient-to-b from-gray-100 via-blue-50/30 to-gray-100 font-sans">
+      {/* Header */}
+      <header className="relative w-full px-8 py-6">
+        <div className="flex items-center justify-between">
+          {/* Top-left box */}
+          <div className="bg-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700">
+            Get started by editing{" "}
+            <code className="font-semibold text-gray-900">src/app/page.js</code>
+          </div>
+
+          {/* Center NEXT.JS */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            <h1 className="text-7xl font-bold text-black tracking-tight">
+              NEXT<span className="text-5xl relative -top-2">.JS</span>
+            </h1>
+          </div>
+
+          {/* Top-right Sign In and Vercel */}
+          <div className="flex items-center gap-2">
+            {session?.user ? (
+              <>
+                {session.user.image && (
+                  <Image
+                    src={session.user.image}
+                    alt={session.user.name || "User"}
+                    width={24}
+                    height={24}
+                    className="rounded-full"
+                  />
+                )}
+                <span className="text-blue-600 font-medium">
+                  {session.user.name || session.user.email?.split("@")[0] || "User"}
+                </span>
+                <button
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  className="text-red-600 font-medium hover:underline"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => signIn("google", { callbackUrl: "/" })}
+                className="text-green-600 font-medium hover:underline"
+              >
+                Sign In
+              </button>
+            )}
+            <span className="text-black">By</span>
             <Image
-              className="dark:invert"
               src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+              alt="Vercel"
+              width={20}
+              height={20}
+              className="brightness-0"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
+            <span className="text-black font-bold">Vercel</span>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content Blocks */}
+      <main className="container mx-auto px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          {/* Docs Block */}
+          <Link
             href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
             target="_blank"
             rel="noopener noreferrer"
+            className="group"
           >
-            Documentation
-          </a>
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-black mb-2 group-hover:underline">
+                Docs <span className="inline-block">-&gt;</span>
+              </h2>
+              <p className="text-gray-600 text-sm">
+                Find in-depth information about Next.js features and API.
+              </p>
+            </div>
+          </Link>
+
+          {/* Learn Block */}
+          <Link
+            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group"
+          >
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-black mb-2 group-hover:underline">
+                Learn <span className="inline-block">-&gt;</span>
+              </h2>
+              <p className="text-gray-600 text-sm">
+                Learn about Next.js in an interactive course with quizzes!
+              </p>
+            </div>
+          </Link>
+
+          {/* Templates Block */}
+          <Link
+            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group"
+          >
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-black mb-2 group-hover:underline">
+                Templates <span className="inline-block">-&gt;</span>
+              </h2>
+              <p className="text-gray-600 text-sm">
+                Explore starter templates for Next.js.
+              </p>
+            </div>
+          </Link>
+
+          {/* Manage API Keys Block */}
+          <Link
+            href="/dashboards"
+            className="group"
+          >
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-black mb-2 group-hover:underline">
+                Manage API Keys <span className="inline-block">-&gt;</span>
+              </h2>
+              <p className="text-gray-600 text-sm">
+                Access the dashboard to manage your API keys.
+              </p>
+            </div>
+          </Link>
+        </div>
+
+        {/* Deploy Block - Bottom row, full width on mobile, left-aligned on desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Link
+            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group"
+          >
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-black mb-2 group-hover:underline">
+                Deploy <span className="inline-block">-&gt;</span>
+              </h2>
+              <p className="text-gray-600 text-sm">
+                Instantly deploy your Next.js site to a shareable URL with Vercel.
+              </p>
+            </div>
+          </Link>
         </div>
       </main>
     </div>
