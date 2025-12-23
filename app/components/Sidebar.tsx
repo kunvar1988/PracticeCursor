@@ -115,24 +115,24 @@ export default function Sidebar({ isOpen }: SidebarProps) {
       isOpen ? "translate-x-0" : "-translate-x-full"
     }`}>
       {/* Logo */}
-      <div className="px-6 py-6 border-b border-gray-200">
+      <div className="px-4 py-6 border-b border-gray-200">
         <div className="flex items-center gap-2">
           {/* Tavily Logo - Stylized T with three arrows */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 flex-shrink-0">
             {/* Blue arrow pointing up */}
-            <svg className="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2L8 6h3v8h2V6h3L12 2z" />
             </svg>
             {/* Red arrow pointing left */}
-            <svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
               <path d="M22 12L18 8v3H10v2h8v3l4-4z" />
             </svg>
             {/* Yellow arrow pointing right */}
-            <svg className="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
               <path d="M2 12l4 4v-3h8v-2H6V8L2 12z" />
             </svg>
           </div>
-          <span className="text-xl font-semibold text-gray-900">Practice Cursor</span>
+          <span className="text-lg font-semibold text-gray-900 whitespace-nowrap">Practice Cursor</span>
         </div>
       </div>
 
