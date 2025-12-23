@@ -1,12 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { signIn, signOut, useSession } from "next-auth/react";
 
 export default function Home() {
-  const { data: session } = useSession();
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 via-blue-50/30 to-gray-100 font-sans">
       {/* Header */}
@@ -23,48 +19,6 @@ export default function Home() {
             <h1 className="text-7xl font-bold text-black tracking-tight">
               NEXT<span className="text-5xl relative -top-2">.JS</span>
             </h1>
-          </div>
-
-          {/* Top-right Sign In and Vercel */}
-          <div className="flex items-center gap-2">
-            {session?.user ? (
-              <>
-                {session.user.image && (
-                  <Image
-                    src={session.user.image}
-                    alt={session.user.name || "User"}
-                    width={24}
-                    height={24}
-                    className="rounded-full"
-                  />
-                )}
-                <span className="text-blue-600 font-medium">
-                  {session.user.name || session.user.email?.split("@")[0] || "User"}
-                </span>
-                <button
-                  onClick={() => signOut({ callbackUrl: "/" })}
-                  className="text-red-600 font-medium hover:underline"
-                >
-                  Sign Out
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={() => signIn("google", { callbackUrl: "/" })}
-                className="text-green-600 font-medium hover:underline"
-              >
-                Sign In
-              </button>
-            )}
-            <span className="text-black">By</span>
-            <Image
-              src="/vercel.svg"
-              alt="Vercel"
-              width={20}
-              height={20}
-              className="brightness-0"
-            />
-            <span className="text-black font-bold">Vercel</span>
           </div>
         </div>
       </header>
