@@ -11,6 +11,10 @@ Your application requires the following environment variables:
 | `OPENAI_API_KEY` | Your OpenAI API key for the GitHub summarizer | ✅ Yes | `sk-proj-...` |
 | `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL | ✅ Yes | `https://xxxxx.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anonymous/public key | ✅ Yes | `eyJhbGci...` |
+| `GOOGLE_CLIENT_ID` | Google OAuth Client ID for authentication | ✅ Yes | `123456789-abc.apps.googleusercontent.com` |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth Client Secret for authentication | ✅ Yes | `GOCSPX-abc123...` |
+| `NEXTAUTH_SECRET` | Secret key for NextAuth.js session encryption | ✅ Yes | Random string (generate with `openssl rand -base64 32`) |
+| `NEXTAUTH_URL` | Your application's public URL | ✅ Yes | `https://yourdomain.com` (production) or `http://localhost:3000` (dev) |
 | `DB_URL` | Database connection URL (if using direct DB connection) | ❌ No | Optional |
 
 ## Platform-Specific Setup Instructions
@@ -40,7 +44,16 @@ Vercel is the recommended platform for Next.js applications.
    OPENAI_API_KEY
    NEXT_PUBLIC_SUPABASE_URL
    NEXT_PUBLIC_SUPABASE_ANON_KEY
+   GOOGLE_CLIENT_ID
+   GOOGLE_CLIENT_SECRET
+   NEXTAUTH_SECRET
+   NEXTAUTH_URL
    ```
+   
+   **Important Notes:**
+   - For `NEXTAUTH_URL`, use your Vercel deployment URL: `https://your-project.vercel.app`
+   - For `NEXTAUTH_SECRET`, generate a random string (see "Quick Reference" section below)
+   - Make sure to use the **production** Google OAuth credentials (not development ones)
 
 5. **Redeploy:**
    - Go to **Deployments** tab
@@ -70,11 +83,19 @@ Vercel is the recommended platform for Next.js applications.
    vercel env add OPENAI_API_KEY production
    vercel env add NEXT_PUBLIC_SUPABASE_URL production
    vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY production
+   vercel env add GOOGLE_CLIENT_ID production
+   vercel env add GOOGLE_CLIENT_SECRET production
+   vercel env add NEXTAUTH_SECRET production
+   vercel env add NEXTAUTH_URL production
 
    # For preview/development (optional)
    vercel env add OPENAI_API_KEY preview
    vercel env add NEXT_PUBLIC_SUPABASE_URL preview
    vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY preview
+   vercel env add GOOGLE_CLIENT_ID preview
+   vercel env add GOOGLE_CLIENT_SECRET preview
+   vercel env add NEXTAUTH_SECRET preview
+   vercel env add NEXTAUTH_URL preview
    ```
 
 5. **Deploy:**
@@ -91,6 +112,10 @@ Create `.vercel/.env.production`:
 OPENAI_API_KEY=your-key-here
 NEXT_PUBLIC_SUPABASE_URL=your-url-here
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-key-here
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-client-secret
+NEXTAUTH_SECRET=your-random-secret-key
+NEXTAUTH_URL=https://your-project.vercel.app
 ```
 
 ---
@@ -238,6 +263,42 @@ services:
 3. Copy:
    - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
    - **anon public** key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+### Google OAuth Credentials
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Select your project (or create a new one)
+3. Navigate to **APIs & Services** → **Credentials**
+4. Click **Create Credentials** → **OAuth client ID**
+5. Configure OAuth consent screen if prompted
+6. Select **Web application** as the application type
+7. Add authorized redirect URIs:
+   - For production: `https://your-domain.com/api/auth/callback/google`
+   - For Vercel: `https://your-project.vercel.app/api/auth/callback/google`
+8. Copy:
+   - **Client ID** → `GOOGLE_CLIENT_ID`
+   - **Client Secret** → `GOOGLE_CLIENT_SECRET`
+
+### NextAuth Secret
+Generate a random secret key for `NEXTAUTH_SECRET`:
+
+**On macOS/Linux:**
+```bash
+openssl rand -base64 32
+```
+
+**On Windows (PowerShell):**
+```powershell
+-join ((48..57) + (65..90) + (97..122) | Get-Random -Count 32 | % {[char]$_})
+```
+
+**Or use an online generator:**
+- Visit [https://generate-secret.vercel.app/32](https://generate-secret.vercel.app/32)
+- Copy the generated string
+
+### NEXTAUTH_URL
+- **For production:** Use your Vercel deployment URL: `https://your-project.vercel.app`
+- **For development:** Use `http://localhost:3000`
+- **Important:** This must match the domain where your app is deployed
 
 ---
 

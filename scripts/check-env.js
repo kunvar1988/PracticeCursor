@@ -23,6 +23,26 @@ const requiredVars = {
     required: true,
     public: true,
   },
+  GOOGLE_CLIENT_ID: {
+    description: 'Google OAuth Client ID for authentication',
+    required: true,
+    public: false,
+  },
+  GOOGLE_CLIENT_SECRET: {
+    description: 'Google OAuth Client Secret for authentication',
+    required: true,
+    public: false,
+  },
+  NEXTAUTH_SECRET: {
+    description: 'Secret key for NextAuth.js session encryption',
+    required: true,
+    public: false,
+  },
+  NEXTAUTH_URL: {
+    description: 'Your application public URL (e.g., https://yourdomain.com or http://localhost:3000)',
+    required: true,
+    public: false,
+  },
   DB_URL: {
     description: 'Database connection URL (optional)',
     required: false,
