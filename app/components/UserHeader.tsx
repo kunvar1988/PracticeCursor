@@ -8,7 +8,11 @@ export default function UserHeader() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-[100] bg-white border-b border-gray-200 px-8 py-4 shadow-sm">
-      <div className="flex items-center justify-end gap-2">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center">
+          <h1 className="text-2xl font-bold text-gray-900">Practice Cursor</h1>
+        </div>
+        <div className="flex items-center gap-2">
         {session?.user ? (
           <>
             {session.user.image ? (
@@ -53,6 +57,7 @@ export default function UserHeader() {
           className="brightness-0"
         />
         <span className="text-black font-bold">Vercel</span>
+        </div>
       </div>
     </header>
   );
