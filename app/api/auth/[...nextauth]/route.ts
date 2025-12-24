@@ -37,6 +37,31 @@ if (typeof window === "undefined") {
   validateEnvVars();
 }
 
+// Helper function to determine environment
+function getEnvironment(): string {
+  // Check Vercel environment first (if deployed on Vercel)
+  if (process.env.VERCEL_ENV) {
+    return process.env.VERCEL_ENV; // 'development', 'preview', or 'production'
+  }
+  
+  // Check NODE_ENV
+  if (process.env.NODE_ENV === "development") {
+    return "local";
+  }
+  if (process.env.NODE_ENV === "production") {
+    return "production";
+  }
+  
+  // Check NEXTAUTH_URL to determine if local
+  const nextAuthUrl = process.env.NEXTAUTH_URL || "";
+  if (nextAuthUrl.includes("localhost") || nextAuthUrl.includes("127.0.0.1")) {
+    return "local";
+  }
+  
+  // Default fallback
+  return "production";
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
@@ -65,7 +90,8 @@ export const authOptions: NextAuthOptions = {
         }
 
         if (existingUser) {
-          // User exists, update last_login
+          // User exists, update last_login and environment
+          const environment = getEnvironment();
           const { error: updateError } = await supabase
             .from("users")
             .update({ 
@@ -75,6 +101,7 @@ export const authOptions: NextAuthOptions = {
               name: user.name || null,
               email: user.email || null,
               image: user.image || null,
+              environment: environment, // Update environment on each login
             })
             .eq("provider_id", user.id);
 
@@ -83,6 +110,7 @@ export const authOptions: NextAuthOptions = {
           }
         } else {
           // New user, insert into database with UUID
+          const environment = getEnvironment();
           const { error: insertError } = await supabase
             .from("users")
             .insert({
@@ -91,6 +119,7 @@ export const authOptions: NextAuthOptions = {
               name: user.name || null,
               email: user.email || null,
               image: user.image || null,
+              environment: environment, // Track where user was created
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
               last_login: new Date().toISOString(),
