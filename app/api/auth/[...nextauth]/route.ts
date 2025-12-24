@@ -74,24 +74,26 @@ export const authOptions: NextAuthOptions = {
       try {
         // Get Supabase client
         const supabase = await createClient();
+        const environment = getEnvironment();
         
-        // Check if user already exists by provider_id (Google user ID)
+        // Check if user already exists by provider_id AND environment
+        // This allows the same user to have separate entries for local and production
         const { data: existingUser, error: fetchError } = await supabase
           .from("users")
-          .select("id, provider_id")
+          .select("id, provider_id, environment")
           .eq("provider_id", user.id)
+          .eq("environment", environment)
           .single();
 
         if (fetchError && fetchError.code !== "PGRST116") {
-          // PGRST116 is "not found" error, which is expected for new users
+          // PGRST116 is "not found" error, which is expected for new users in this environment
           console.error("Error checking user existence:", fetchError);
           // Continue with sign-in even if there's an error
           return true;
         }
 
         if (existingUser) {
-          // User exists, update last_login and environment
-          const environment = getEnvironment();
+          // User exists in this environment, update last_login
           const { error: updateError } = await supabase
             .from("users")
             .update({ 
@@ -101,16 +103,16 @@ export const authOptions: NextAuthOptions = {
               name: user.name || null,
               email: user.email || null,
               image: user.image || null,
-              environment: environment, // Update environment on each login
             })
-            .eq("provider_id", user.id);
+            .eq("provider_id", user.id)
+            .eq("environment", environment);
 
           if (updateError) {
             console.error("Error updating user:", updateError);
           }
         } else {
-          // New user, insert into database with UUID
-          const environment = getEnvironment();
+          // New user in this environment, insert into database with UUID
+          // This creates a separate entry for local vs production
           const { error: insertError } = await supabase
             .from("users")
             .insert({
@@ -119,7 +121,7 @@ export const authOptions: NextAuthOptions = {
               name: user.name || null,
               email: user.email || null,
               image: user.image || null,
-              environment: environment, // Track where user was created
+              environment: environment, // Track which environment this entry is for
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
               last_login: new Date().toISOString(),
@@ -149,26 +151,32 @@ export const authOptions: NextAuthOptions = {
     },
     async jwt({ token, user, account }) {
       if (user) {
-        // Get the UUID from database by looking up the provider_id
+        // Get the UUID from database by looking up the provider_id AND environment
+        // This ensures we get the correct entry for the current environment
         try {
           const supabase = await createClient();
+          const environment = getEnvironment();
           const { data: dbUser, error } = await supabase
             .from("users")
             .select("id")
             .eq("provider_id", user.id)
+            .eq("environment", environment)
             .single();
           
           if (!error && dbUser) {
             // Use the UUID from database as the token subject
             token.sub = dbUser.id;
+            token.environment = environment; // Store environment in token for reference
           } else {
             // Fallback to provider ID if database lookup fails
             token.sub = user.id;
+            token.environment = environment;
           }
         } catch (error) {
           console.error("Error fetching user UUID:", error);
           // Fallback to provider ID
           token.sub = user.id;
+          token.environment = getEnvironment();
         }
       }
       return token;
