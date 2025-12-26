@@ -1,9 +1,12 @@
 "use client";
 
 import { signIn, signOut, useSession } from "next-auth/react";
+import { useState } from "react";
 
 export function SignInButton() {
   const { data: session, status } = useSession();
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   if (status === "loading") {
     return (
@@ -34,8 +37,32 @@ export function SignInButton() {
           {session.user.name || session.user.email?.split("@")[0] || "User"}
         </div>
         <button
-          onClick={() => signOut({ callbackUrl: "/" })}
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-red-600 px-5 text-white transition-colors hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 md:w-[158px]"
+          onClick={async () => {
+            try {
+              setIsSigningOut(true);
+              console.log("[SignInButton] Sign out initiated for user:", session.user?.email);
+              
+              const result = await signOut({ 
+                callbackUrl: "/",
+                redirect: true 
+              });
+              
+              console.log("[SignInButton] Sign out successful");
+            } catch (error) {
+              const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+              console.error("[SignInButton] Sign out error:", {
+                error,
+                message: errorMessage,
+                stack: error instanceof Error ? error.stack : undefined,
+                timestamp: new Date().toISOString(),
+              });
+              alert(`Failed to sign out: ${errorMessage}`);
+            } finally {
+              setIsSigningOut(false);
+            }
+          }}
+          disabled={isSigningOut}
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-red-600 px-5 text-white transition-colors hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 md:w-[158px] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -50,8 +77,8 @@ export function SignInButton() {
               strokeLinejoin="round"
               d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
             />
-          </svg>
-          Logout
+            </svg>
+          {isSigningOut ? "Logging out..." : "Logout"}
         </button>
       </>
     );
@@ -59,8 +86,60 @@ export function SignInButton() {
 
   return (
     <button
-      onClick={() => signIn("google", { callbackUrl: "/" })}
-      className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-blue-600 px-5 text-white transition-colors hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 md:w-[158px]"
+      onClick={async () => {
+        try {
+          setIsSigningIn(true);
+          console.log("[SignInButton] Sign in initiated with Google OAuth");
+          
+          // Use redirect: false to catch errors, then redirect manually on success
+          const result = await signIn("google", { 
+            callbackUrl: "/",
+            redirect: false 
+          });
+          
+          if (result?.error) {
+            console.error("[SignInButton] Sign in error from NextAuth:", {
+              error: result.error,
+              ok: result.ok,
+              status: result.status,
+              url: result.url,
+              timestamp: new Date().toISOString(),
+            });
+            alert(`Sign in failed: ${result.error}`);
+            setIsSigningIn(false);
+          } else if (result?.url) {
+            // If we have a URL (even if ok is not explicitly true), redirect to it
+            // This handles OAuth flows where NextAuth returns a redirect URL
+            console.log("[SignInButton] Redirecting to OAuth provider:", result.url);
+            window.location.href = result.url;
+          } else if (result === undefined || result === null) {
+            // OAuth flow might have been initiated - NextAuth will handle the redirect
+            // Don't show error, just let the flow proceed
+            console.log("[SignInButton] OAuth flow may have been initiated");
+            // Reset state after a short delay in case redirect doesn't happen
+            setTimeout(() => {
+              setIsSigningIn(false);
+            }, 2000);
+          } else {
+            // Result exists but no URL - this shouldn't happen with OAuth
+            // But don't show error alert as the flow might still work
+            console.warn("[SignInButton] Unexpected sign in result (no URL):", result);
+            setIsSigningIn(false);
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+          console.error("[SignInButton] Sign in error:", {
+            error,
+            message: errorMessage,
+            stack: error instanceof Error ? error.stack : undefined,
+            timestamp: new Date().toISOString(),
+          });
+          alert(`Failed to sign in: ${errorMessage}`);
+          setIsSigningIn(false);
+        }
+      }}
+      disabled={isSigningIn}
+      className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-blue-600 px-5 text-white transition-colors hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 md:w-[158px] disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <svg
         className="h-5 w-5"
@@ -85,7 +164,7 @@ export function SignInButton() {
           fill="#EA4335"
         />
       </svg>
-      Login with Google
+      {isSigningIn ? "Signing in..." : "Login with Google"}
     </button>
   );
 }

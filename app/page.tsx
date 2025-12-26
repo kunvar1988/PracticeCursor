@@ -1,117 +1,23 @@
-"use client";
-
-import Link from "next/link";
+import { Navbar } from "@/components/navbar"
+import { HeroSection } from "@/components/hero-section"
+import { FeaturesSection } from "@/components/features-section"
+import { PricingSection } from "@/components/pricing-section"
+import { CTASection } from "@/components/cta-section"
+import { Footer } from "@/components/footer"
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-100 via-blue-50/30 to-gray-100 font-sans">
-      {/* Header */}
-      <header className="relative w-full px-8 py-6">
-        <div className="flex items-center justify-between">
-          {/* Top-left box */}
-          <div className="bg-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700">
-            Get started by editing{" "}
-            <code className="font-semibold text-gray-900">src/app/page.js</code>
-          </div>
-
-          {/* Center NEXT.JS */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <h1 className="text-7xl font-bold text-black tracking-tight">
-              NEXT<span className="text-5xl relative -top-2">.JS</span>
-            </h1>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content Blocks */}
-      <main className="container mx-auto px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          {/* Docs Block */}
-          <Link
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group"
-          >
-            <div className="p-6">
-              <h2 className="text-xl font-bold text-black mb-2 group-hover:underline">
-                Docs <span className="inline-block">-&gt;</span>
-              </h2>
-              <p className="text-gray-600 text-sm">
-                Find in-depth information about Next.js features and API.
-              </p>
-            </div>
-          </Link>
-
-          {/* Learn Block */}
-          <Link
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group"
-          >
-            <div className="p-6">
-              <h2 className="text-xl font-bold text-black mb-2 group-hover:underline">
-                Learn <span className="inline-block">-&gt;</span>
-              </h2>
-              <p className="text-gray-600 text-sm">
-                Learn about Next.js in an interactive course with quizzes!
-              </p>
-            </div>
-          </Link>
-
-          {/* Templates Block */}
-          <Link
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group"
-          >
-            <div className="p-6">
-              <h2 className="text-xl font-bold text-black mb-2 group-hover:underline">
-                Templates <span className="inline-block">-&gt;</span>
-              </h2>
-              <p className="text-gray-600 text-sm">
-                Explore starter templates for Next.js.
-              </p>
-            </div>
-          </Link>
-
-          {/* Manage API Keys Block */}
-          <Link
-            href="/dashboards"
-            className="group"
-          >
-            <div className="p-6">
-              <h2 className="text-xl font-bold text-black mb-2 group-hover:underline">
-                Manage API Keys <span className="inline-block">-&gt;</span>
-              </h2>
-              <p className="text-gray-600 text-sm">
-                Access the dashboard to manage your API keys.
-              </p>
-            </div>
-          </Link>
-        </div>
-
-        {/* Deploy Block - Bottom row, full width on mobile, left-aligned on desktop */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Link
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group"
-          >
-            <div className="p-6">
-              <h2 className="text-xl font-bold text-black mb-2 group-hover:underline">
-                Deploy <span className="inline-block">-&gt;</span>
-              </h2>
-              <p className="text-gray-600 text-sm">
-                Instantly deploy your Next.js site to a shareable URL with Vercel.
-              </p>
-            </div>
-          </Link>
-        </div>
-      </main>
+    <div className="min-h-screen">
+      <div>
+        <Navbar />
+        <main>
+          <HeroSection />
+          <FeaturesSection />
+          <PricingSection />
+          <CTASection />
+        </main>
+        <Footer />
+      </div>
     </div>
-  );
+  )
 }

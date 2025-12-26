@@ -66,13 +66,15 @@ export async function PUT(
     }
 
     return NextResponse.json(updatedKey);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error updating API key:", error);
+    const errorDetails = error instanceof Error ? error.message : "Unknown error";
+    const errorCode = (error as { code?: string })?.code || "UNKNOWN";
     return NextResponse.json(
       { 
         error: "Failed to update API key",
-        details: error?.message || "Unknown error",
-        code: error?.code || "UNKNOWN"
+        details: errorDetails,
+        code: errorCode
       },
       { status: 500 }
     );

@@ -6,13 +6,15 @@ export async function GET() {
   try {
     const apiKeys = await storage.getAllKeys();
     return NextResponse.json(apiKeys);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching API keys:", error);
+    const errorDetails = error instanceof Error ? error.message : "Unknown error";
+    const errorCode = (error as { code?: string })?.code || "UNKNOWN";
     return NextResponse.json(
       { 
         error: "Failed to fetch API keys",
-        details: error?.message || "Unknown error",
-        code: error?.code || "UNKNOWN"
+        details: errorDetails,
+        code: errorCode
       },
       { status: 500 }
     );
@@ -34,13 +36,15 @@ export async function POST(request: NextRequest) {
 
     const newApiKey = await storage.createKey(name, key, value, usage);
     return NextResponse.json(newApiKey, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error creating API key:", error);
+    const errorDetails = error instanceof Error ? error.message : "Unknown error";
+    const errorCode = (error as { code?: string })?.code || "UNKNOWN";
     return NextResponse.json(
       { 
         error: "Failed to create API key",
-        details: error?.message || "Unknown error",
-        code: error?.code || "UNKNOWN"
+        details: errorDetails,
+        code: errorCode
       },
       { status: 500 }
     );

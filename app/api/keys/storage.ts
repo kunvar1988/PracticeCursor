@@ -101,7 +101,7 @@ export async function updateKey(
   value?: string,
   usage?: number
 ): Promise<ApiKey | null> {
-  const updateData: any = {
+  const updateData: Partial<Pick<ApiKeyRow, 'name' | 'key' | 'value' | 'usage' | 'updated_at'>> = {
     name,
     key,
     updated_at: new Date().toISOString(),

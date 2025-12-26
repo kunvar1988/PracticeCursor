@@ -235,7 +235,7 @@ export default function ApiKeyModal({
 
               {/* Disclaimer */}
               <p className="text-xs text-gray-500 leading-relaxed">
-                * If the combined usage of all your keys exceeds your account's allocated usage
+                * If the combined usage of all your keys exceeds your account&apos;s allocated usage
                 limit (plan, add-ons, and any pay-as-you-go limit), all requests will be rejected.
               </p>
 

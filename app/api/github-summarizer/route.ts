@@ -95,9 +95,9 @@ export async function POST(request: NextRequest) {
       valid: true,
       ...result
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Return a more specific error message
-    const errorMessage = error?.message || "Unknown error";
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     
     // Check if it's an OpenAI API key error
     if (errorMessage.includes("OPENAI_API_KEY") || errorMessage.includes("Missing credentials")) {

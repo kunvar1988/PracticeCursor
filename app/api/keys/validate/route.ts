@@ -60,13 +60,14 @@ export async function POST(request: NextRequest) {
         key: data.key,
       }
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error validating API key:", error);
+    const errorDetails = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
       { 
         valid: false,
         error: "Failed to validate API key",
-        details: error?.message || "Unknown error"
+        details: errorDetails
       },
       { status: 500 }
     );

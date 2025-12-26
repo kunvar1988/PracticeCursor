@@ -76,8 +76,9 @@ export default function ProtectedPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex">
-      <Sidebar isOpen={sidebarOpen} />
+    <>
+      <div className="min-h-screen bg-white flex">
+        <Sidebar isOpen={sidebarOpen} />
       {/* Overlay for mobile */}
       {sidebarOpen && (
         <div
@@ -108,7 +109,7 @@ export default function ProtectedPage() {
           </svg>
         </button>
         
-        <main className="p-8 pt-20">
+        <main className="p-8">
           <div className="max-w-2xl mx-auto">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Protected Page</h1>
             <p className="text-gray-600 mb-8">
@@ -197,6 +198,7 @@ export default function ProtectedPage() {
         onClose={hideToast}
       />
     </div>
+    </>
   );
 }
 

@@ -87,7 +87,15 @@ export const authOptions: NextAuthOptions = {
 
         if (fetchError && fetchError.code !== "PGRST116") {
           // PGRST116 is "not found" error, which is expected for new users in this environment
-          console.error("Error checking user existence:", fetchError);
+          console.error("[NextAuth] Error checking user existence:", {
+            error: fetchError,
+            code: fetchError.code,
+            message: fetchError.message,
+            userEmail: user.email,
+            providerId: user.id,
+            environment,
+            timestamp: new Date().toISOString(),
+          });
           // Continue with sign-in even if there's an error
           return true;
         }
@@ -108,7 +116,22 @@ export const authOptions: NextAuthOptions = {
             .eq("environment", environment);
 
           if (updateError) {
-            console.error("Error updating user:", updateError);
+            console.error("[NextAuth] Error updating user:", {
+              error: updateError,
+              code: updateError.code,
+              message: updateError.message,
+              userEmail: user.email,
+              providerId: user.id,
+              environment,
+              timestamp: new Date().toISOString(),
+            });
+          } else {
+            console.log("[NextAuth] User updated successfully:", {
+              userEmail: user.email,
+              providerId: user.id,
+              environment,
+              timestamp: new Date().toISOString(),
+            });
           }
         } else {
           // New user in this environment, insert into database with UUID
@@ -128,16 +151,40 @@ export const authOptions: NextAuthOptions = {
             });
 
           if (insertError) {
-            console.error("Error inserting user:", insertError);
+            console.error("[NextAuth] Error inserting user:", {
+              error: insertError,
+              code: insertError.code,
+              message: insertError.message,
+              details: insertError.details,
+              hint: insertError.hint,
+              userEmail: user.email,
+              providerId: user.id,
+              environment,
+              timestamp: new Date().toISOString(),
+            });
             // Continue with sign-in even if database insert fails
           } else {
-            console.log("✅ New user created in database:", user.email);
+            console.log("[NextAuth] ✅ New user created in database:", {
+              userEmail: user.email,
+              providerId: user.id,
+              environment,
+              timestamp: new Date().toISOString(),
+            });
           }
         }
 
         return true; // Allow sign-in to proceed
       } catch (error) {
-        console.error("Error in signIn callback:", error);
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        const errorStack = error instanceof Error ? error.stack : undefined;
+        console.error("[NextAuth] Error in signIn callback:", {
+          error,
+          message: errorMessage,
+          stack: errorStack,
+          userEmail: user?.email,
+          providerId: user?.id,
+          timestamp: new Date().toISOString(),
+        });
         // Return true to allow sign-in even if database operation fails
         return true;
       }
@@ -169,14 +216,28 @@ export const authOptions: NextAuthOptions = {
             token.environment = environment; // Store environment in token for reference
           } else {
             // Fallback to provider ID if database lookup fails
+            console.warn("[NextAuth] User not found in database, using provider ID:", {
+              providerId: user.id,
+              environment,
+              timestamp: new Date().toISOString(),
+            });
             token.sub = user.id;
             token.environment = environment;
           }
         } catch (error) {
-          console.error("Error fetching user UUID:", error);
+          const errorMessage = error instanceof Error ? error.message : "Unknown error";
+          const environment = getEnvironment();
+          console.error("[NextAuth] Error fetching user UUID:", {
+            error,
+            message: errorMessage,
+            stack: error instanceof Error ? error.stack : undefined,
+            providerId: user.id,
+            environment,
+            timestamp: new Date().toISOString(),
+          });
           // Fallback to provider ID
           token.sub = user.id;
-          token.environment = getEnvironment();
+          token.environment = environment;
         }
       }
       return token;

@@ -46,7 +46,7 @@ export default function Dashboard() {
         {/* Toggle Button */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className={`fixed top-4 z-50 p-2 bg-white rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition-all duration-300 ${
+          className={`fixed top-20 z-50 p-2 bg-white rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition-all duration-300 ${
             sidebarOpen ? "left-[260px]" : "left-4"
           }`}
           aria-label="Toggle sidebar"
