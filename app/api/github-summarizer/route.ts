@@ -1,11 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "../../lib/supabaseClient";
+import { supabase, validateSupabaseConfig } from "../../lib/supabaseClient";
 import { summarizeRepoChain } from "./chain";
 
 
 // POST - GitHub Summarizer endpoint with API key validation
 export async function POST(request: NextRequest) {
   try {
+    // Validate environment variables at runtime
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json(
+        { 
+          valid: false,
+          error: "OpenAI API key not configured",
+          details: "Please set the 'OPENAI_API_KEY' environment variable. See ENV_SETUP.md for instructions."
+        },
+        { status: 500 }
+      );
+    }
+
+    // Validate Supabase configuration at runtime
+    try {
+      validateSupabaseConfig();
+    } catch (error) {
+      return NextResponse.json(
+        { 
+          valid: false,
+          error: "Supabase configuration error",
+          details: error instanceof Error ? error.message : "Missing Supabase environment variables"
+        },
+        { status: 500 }
+      );
+    }
     // Get API key from x-api-key header
     let key = request.headers.get('x-api-key');
     

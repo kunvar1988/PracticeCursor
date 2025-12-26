@@ -24,16 +24,13 @@ const prompt = ChatPromptTemplate.fromMessages([
   ["human", "{readmeContent}"],
 ]);
 
-// Check if OpenAI API key is configured
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error("Missing credentials. Please pass an 'apiKey', or set the 'OPENAI_API_KEY' environment variable.");
-}
-
 // Instantiate the OpenAI chat model
+// Note: We don't validate at module load time to avoid build failures
+// Validation will happen at runtime when the chain is actually used
 const llm = new ChatOpenAI({
   model: "gpt-3.5-turbo", // or "gpt-4" etc.
   temperature: 0,
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY || "", // Will be validated at runtime
 });
 
 // Bind StructuredOutput to the model using withStructuredOutput
