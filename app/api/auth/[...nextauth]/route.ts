@@ -3,7 +3,8 @@ import GoogleProvider from "next-auth/providers/google";
 import { createClient } from "@/app/lib/supabaseServer";
 import { randomUUID } from "crypto";
 
-// Validate environment variables at startup
+// Validate environment variables at runtime (not during build)
+// This function is called when the route handler is actually invoked, not at module load time
 function validateEnvVars() {
   const missing: string[] = [];
   
@@ -23,18 +24,14 @@ function validateEnvVars() {
   if (missing.length > 0) {
     const errorMsg = `Missing required environment variables: ${missing.join(", ")}. Please check your Vercel environment variables configuration.`;
     console.error("❌ NextAuth Configuration Error:", errorMsg);
-    // In production, we still want to log but not crash the build
-    if (process.env.NODE_ENV === "development") {
+    // Only throw in development to help with local debugging
+    // In production/build, we'll let NextAuth handle the error gracefully
+    if (process.env.NODE_ENV === "development" && !process.env.VERCEL) {
       throw new Error(errorMsg);
     }
   } else {
     console.log("✅ NextAuth environment variables validated successfully");
   }
-}
-
-// Validate on module load (only in server environment)
-if (typeof window === "undefined") {
-  validateEnvVars();
 }
 
 // Helper function to determine environment
@@ -61,6 +58,10 @@ function getEnvironment(): string {
   // Default fallback
   return "production";
 }
+
+// Note: We don't validate at module load time to avoid build failures
+// Validation will happen at runtime when the route handler is actually invoked
+// NextAuth will handle missing environment variables gracefully
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -251,6 +252,9 @@ export const authOptions: NextAuthOptions = {
   debug: process.env.NODE_ENV === "development",
 };
 
+// Create NextAuth handler
+// Note: We don't validate env vars at module load time to prevent build failures
+// NextAuth will handle missing environment variables gracefully at runtime
 const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };

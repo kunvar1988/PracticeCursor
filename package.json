@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "check-env": "node scripts/check-env.js",
+    "diagnose": "node scripts/diagnose-deployment.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
