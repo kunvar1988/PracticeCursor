@@ -8,6 +8,7 @@ export interface ApiKey {
   key: string;
   value?: string;
   usage?: number;
+  environment?: string;
   createdAt: string;
   lastUsed?: string;
 }
@@ -19,6 +20,7 @@ interface ApiKeyRow {
   key: string;
   value?: string;
   usage?: number;
+  environment?: string;
   created_at: string;
   last_used?: string;
   updated_at?: string;
@@ -32,6 +34,7 @@ function rowToApiKey(row: ApiKeyRow): ApiKey {
     key: row.key,
     value: row.value || row.key, // Fallback to key if value is not set
     usage: row.usage ?? 0,
+    environment: row.environment || undefined,
     createdAt: row.created_at,
     lastUsed: row.last_used || undefined,
   };
@@ -70,17 +73,48 @@ export async function getKeyById(id: string): Promise<ApiKey | undefined> {
   return data ? rowToApiKey(data) : undefined;
 }
 
-export async function createKey(name: string, key: string, value?: string, usage?: number): Promise<ApiKey> {
-  const { data, error } = await supabase
+export async function createKey(name: string, key: string, value?: string, usage?: number, environment?: string): Promise<ApiKey> {
+  // Build insert object
+  const insertData: any = {
+    name,
+    key,
+    value: value || key, // Use provided value or default to key
+    usage: usage ?? 0, // Default to 0 if not provided
+  };
+  
+  // Only add environment if it's provided (column may not exist yet if migration hasn't run)
+  // Try to insert with environment, but if it fails due to missing column, retry without it
+  if (environment !== undefined) {
+    insertData.environment = environment;
+  }
+
+  let data, error;
+  
+  // First attempt: try with environment if provided
+  const result = await supabase
     .from('api_keys')
-    .insert({
-      name,
-      key,
-      value: value || key, // Use provided value or default to key
-      usage: usage ?? 0, // Default to 0 if not provided
-    })
+    .insert(insertData)
     .select()
     .single();
+    
+  data = result.data;
+  error = result.error;
+
+  // If error is PGRST204 (column not found), retry without environment
+  if (error && error.code === 'PGRST204' && environment !== undefined) {
+    console.warn('Environment column not found, creating API key without environment field');
+    const insertDataWithoutEnv = { ...insertData };
+    delete insertDataWithoutEnv.environment;
+    
+    const retryResult = await supabase
+      .from('api_keys')
+      .insert(insertDataWithoutEnv)
+      .select()
+      .single();
+      
+    data = retryResult.data;
+    error = retryResult.error;
+  }
 
   if (error) {
     console.error('Error creating API key:', error);

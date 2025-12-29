@@ -25,7 +25,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, key, value, usage } = body;
+    const { name, key, value, usage, environment } = body;
 
     if (!name || !key) {
       return NextResponse.json(
@@ -34,7 +34,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const newApiKey = await storage.createKey(name, key, value, usage);
+    // Determine environment: use provided, or detect from request
+    const env = environment || process.env.NODE_ENV || (process.env.VERCEL_ENV === 'production' ? 'production' : 'development');
+
+    const newApiKey = await storage.createKey(name, key, value, usage, env);
     return NextResponse.json(newApiKey, { status: 201 });
   } catch (error: unknown) {
     console.error("Error creating API key:", error);

@@ -4,6 +4,7 @@ export interface ApiKey {
   key: string;
   type?: string;
   usage?: number;
+  environment?: string;
   createdAt: string;
   lastUsed?: string;
 }

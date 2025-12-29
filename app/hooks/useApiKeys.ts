@@ -37,10 +37,20 @@ export function useApiKeys() {
     type: string;
   }): Promise<boolean> => {
     try {
+      // Detect environment: localhost = 'local', otherwise 'production'
+      const environment = typeof window !== 'undefined' 
+        ? (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'local' 
+            : 'production')
+        : 'production';
+
       const response = await fetch("/api/keys", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          environment, // Include environment in the request
+        }),
       });
 
       if (response.ok) {
