@@ -18,7 +18,8 @@ export function useDashboard() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [payAsYouGo, setPayAsYouGo] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Sidebar starts closed on mobile, but will be always visible on desktop (lg+) via CSS
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   const { toast, showSuccess, showError, hideToast } = useToast();
   const { apiKeys, loading, createApiKey, updateApiKey, deleteApiKey } = useApiKeys();

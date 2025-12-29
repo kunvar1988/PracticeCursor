@@ -37,13 +37,14 @@ export default function PlaygroundPage() {
           onClick={() => setSidebarOpen(false)}
         />
       )}
-      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "lg:ml-64" : "ml-0"}`}>
-        {/* Toggle Button */}
+      <div className="flex-1 w-full lg:ml-64">
+        {/* Toggle Button - Mobile Only */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className={`fixed top-4 z-50 p-2 bg-white rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition-all duration-300 ${
+          className={`lg:hidden fixed top-16 sm:top-4 z-50 p-2 sm:p-2.5 bg-white rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition-all duration-300 touch-manipulation ${
             sidebarOpen ? "left-[260px]" : "left-4"
           }`}
+          aria-label="Toggle sidebar"
         >
           <svg
             className="w-5 h-5 text-gray-600"
@@ -60,15 +61,15 @@ export default function PlaygroundPage() {
           </svg>
         </button>
         
-        <main className="p-8">
+        <main className="p-4 sm:p-6 md:p-8 pt-20 sm:pt-24 lg:pt-6">
           <div className="max-w-2xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">API Playground</h1>
-            <p className="text-gray-600 mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">API Playground</h1>
+            <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8">
               Enter your API key to validate and access protected resources.
             </p>
 
-            <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-              <div className="mb-6">
+            <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 shadow-sm">
+              <div className="mb-4 sm:mb-6">
                 <label htmlFor="apiKey" className="block text-sm font-medium text-gray-700 mb-2">
                   API Key
                 </label>
@@ -78,7 +79,7 @@ export default function PlaygroundPage() {
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   placeholder="Enter your API key"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-sm sm:text-base"
                   required
                   disabled={isSubmitting}
                 />
@@ -87,7 +88,7 @@ export default function PlaygroundPage() {
               <button
                 type="submit"
                 disabled={isSubmitting || !apiKey.trim()}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                className="w-full bg-blue-600 text-white py-2.5 sm:py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base touch-manipulation"
               >
                 {isSubmitting ? "Validating..." : "Validate API Key"}
               </button>

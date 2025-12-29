@@ -111,73 +111,143 @@ export default function Sidebar({ isOpen }: SidebarProps) {
   };
 
   return (
-    <div className={`fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 flex flex-col transition-transform duration-300 ease-in-out z-40 ${
-      isOpen ? "translate-x-0" : "-translate-x-full"
-    }`}>
-      {/* Logo */}
-      <div className="px-4 py-6 border-b border-gray-200">
-        <div className="flex items-center gap-2">
-          <span className="text-lg font-semibold text-gray-900 whitespace-nowrap">Practice Cursor</span>
-        </div>
-      </div>
-
-      {/* Personal Section */}
-      <div className="px-6 py-4 border-b border-gray-200">
-        <button
-          onClick={() => setIsPersonalOpen(!isPersonalOpen)}
-          className="flex items-center justify-between w-full hover:bg-gray-50 rounded-lg px-3 py-2 transition-colors"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
-              <span className="text-white font-semibold text-sm">K</span>
-            </div>
-            <span className="text-sm font-medium text-gray-900">Personal</span>
+    <>
+      {/* Desktop Sidebar - Always visible */}
+      <div className="hidden lg:flex fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 flex-col z-40">
+        {/* Logo */}
+        <div className="px-4 py-6 border-b border-gray-200">
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-semibold text-gray-900 whitespace-nowrap">Practice Cursor</span>
           </div>
-          <svg
-            className={`w-4 h-4 text-gray-500 transition-transform ${isPersonalOpen ? "rotate-180" : ""}`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+        </div>
+
+        {/* Personal Section */}
+        <div className="px-6 py-4 border-b border-gray-200">
+          <button
+            onClick={() => setIsPersonalOpen(!isPersonalOpen)}
+            className="flex items-center justify-between w-full hover:bg-gray-50 rounded-lg px-3 py-2 transition-colors"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                <span className="text-white font-semibold text-sm">K</span>
+              </div>
+              <span className="text-sm font-medium text-gray-900">Personal</span>
+            </div>
+            <svg
+              className={`w-4 h-4 text-gray-500 transition-transform ${isPersonalOpen ? "rotate-180" : ""}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Navigation Links */}
+        <nav className="flex-1 px-4 py-4 overflow-y-auto">
+          <ul className="space-y-1">
+            {navItems.map((item) => {
+              const active = isActive(item.href);
+              const NavLink = item.external ? "a" : Link;
+              const linkProps = item.external
+                ? { href: item.href, target: "_blank", rel: "noopener noreferrer" }
+                : { href: item.href };
+
+              return (
+                <li key={item.name}>
+                  <NavLink
+                    {...linkProps}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      active
+                        ? "bg-blue-50 text-blue-600"
+                        : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                    }`}
+                  >
+                    <span className={active ? "text-blue-600" : "text-gray-500"}>{item.icon}</span>
+                    <span className="flex-1">{item.name}</span>
+                    {item.external && (
+                      <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    )}
+                  </NavLink>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
       </div>
 
-      {/* Navigation Links */}
-      <nav className="flex-1 px-4 py-4 overflow-y-auto">
-        <ul className="space-y-1">
-          {navItems.map((item) => {
-            const active = isActive(item.href);
-            const NavLink = item.external ? "a" : Link;
-            const linkProps = item.external
-              ? { href: item.href, target: "_blank", rel: "noopener noreferrer" }
-              : { href: item.href };
+      {/* Mobile Sidebar - Pushes content */}
+      <div className={`lg:hidden fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 flex flex-col transition-transform duration-300 ease-in-out z-40 ${
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      }`}>
+        {/* Logo */}
+        <div className="px-4 py-6 border-b border-gray-200">
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-semibold text-gray-900 whitespace-nowrap">Practice Cursor</span>
+          </div>
+        </div>
 
-            return (
-              <li key={item.name}>
-                <NavLink
-                  {...linkProps}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    active
-                      ? "bg-blue-50 text-blue-600"
-                      : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
-                  }`}
-                >
-                  <span className={active ? "text-blue-600" : "text-gray-500"}>{item.icon}</span>
-                  <span className="flex-1">{item.name}</span>
-                  {item.external && (
-                    <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
-                  )}
-                </NavLink>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-    </div>
+        {/* Personal Section */}
+        <div className="px-6 py-4 border-b border-gray-200">
+          <button
+            onClick={() => setIsPersonalOpen(!isPersonalOpen)}
+            className="flex items-center justify-between w-full hover:bg-gray-50 rounded-lg px-3 py-2 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                <span className="text-white font-semibold text-sm">K</span>
+              </div>
+              <span className="text-sm font-medium text-gray-900">Personal</span>
+            </div>
+            <svg
+              className={`w-4 h-4 text-gray-500 transition-transform ${isPersonalOpen ? "rotate-180" : ""}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Navigation Links */}
+        <nav className="flex-1 px-4 py-4 overflow-y-auto">
+          <ul className="space-y-1">
+            {navItems.map((item) => {
+              const active = isActive(item.href);
+              const NavLink = item.external ? "a" : Link;
+              const linkProps = item.external
+                ? { href: item.href, target: "_blank", rel: "noopener noreferrer" }
+                : { href: item.href };
+
+              return (
+                <li key={item.name}>
+                  <NavLink
+                    {...linkProps}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      active
+                        ? "bg-blue-50 text-blue-600"
+                        : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                    }`}
+                  >
+                    <span className={active ? "text-blue-600" : "text-gray-500"}>{item.icon}</span>
+                    <span className="flex-1">{item.name}</span>
+                    {item.external && (
+                      <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    )}
+                  </NavLink>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+      </div>
+    </>
   );
 }
 

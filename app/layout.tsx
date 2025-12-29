@@ -13,6 +13,11 @@ export const metadata: Metadata = {
   description:
     "Get instant insights, summaries, stars, cool facts, and latest pull requests from any open source GitHub repository.",
   generator: "v0.app",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+  },
   icons: {
     icon: [
       {
@@ -38,8 +43,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`font-sans antialiased`}>
+    <html lang="en" className="bg-white">
+      <body className={`font-sans antialiased bg-white`}>
         <Providers>
           {children}
         </Providers>

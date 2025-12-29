@@ -86,13 +86,14 @@ export default function ProtectedPage() {
           onClick={() => setSidebarOpen(false)}
         />
       )}
-      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? "lg:ml-64" : "ml-0"}`}>
-        {/* Toggle Button */}
+      <div className="flex-1 w-full lg:ml-64">
+        {/* Toggle Button - Mobile Only */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className={`fixed top-4 z-50 p-2 bg-white rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition-all duration-300 ${
+          className={`lg:hidden fixed top-16 sm:top-4 z-50 p-2 sm:p-2.5 bg-white rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition-all duration-300 touch-manipulation ${
             sidebarOpen ? "left-[260px]" : "left-4"
           }`}
+          aria-label="Toggle sidebar"
         >
           <svg
             className="w-5 h-5 text-gray-600"
@@ -109,14 +110,14 @@ export default function ProtectedPage() {
           </svg>
         </button>
         
-        <main className="p-8">
+        <main className="p-4 sm:p-6 md:p-8 pt-20 sm:pt-24 lg:pt-6">
           <div className="max-w-2xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Protected Page</h1>
-            <p className="text-gray-600 mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Protected Page</h1>
+            <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8">
               This page validates your API key before allowing access.
             </p>
 
-            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+            <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 shadow-sm">
               {isValidating ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="flex flex-col items-center gap-4">
@@ -125,10 +126,10 @@ export default function ProtectedPage() {
                   </div>
                 </div>
               ) : isValid ? (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="text-center py-6 sm:py-8">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                     <svg
-                      className="w-8 h-8 text-green-600"
+                      className="w-6 h-6 sm:w-8 sm:h-8 text-green-600"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -141,24 +142,24 @@ export default function ProtectedPage() {
                       />
                     </svg>
                   </div>
-                  <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                  <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
                     Access Granted
                   </h2>
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 px-4">
                     Your API key is valid. You can now access protected resources.
                   </p>
                   <button
                     onClick={() => router.push("/playground")}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="px-4 sm:px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base touch-manipulation"
                   >
                     Try Another Key
                   </button>
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="text-center py-6 sm:py-8">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                     <svg
-                      className="w-8 h-8 text-red-600"
+                      className="w-6 h-6 sm:w-8 sm:h-8 text-red-600"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -171,15 +172,15 @@ export default function ProtectedPage() {
                       />
                     </svg>
                   </div>
-                  <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                  <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
                     Access Denied
                   </h2>
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 px-4">
                     The provided API key is invalid. Please check your key and try again.
                   </p>
                   <button
                     onClick={() => router.push("/playground")}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="px-4 sm:px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base touch-manipulation"
                   >
                     Try Again
                   </button>
