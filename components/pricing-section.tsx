@@ -36,7 +36,15 @@ export function PricingSection() {
     <section id="pricing" className="bg-gray-50 py-12 sm:py-16 md:py-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 sm:mb-12 md:mb-16">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-blue-600 px-4">Pricing Plans</h2>
+          <h2 
+            className="text-3xl sm:text-4xl md:text-5xl font-bold px-4"
+            style={{
+              color: '#14b8a6',
+              textShadow: '2px 2px 0px rgba(20, 184, 166, 0.4), 1px 1px 0px rgba(20, 184, 166, 0.3)'
+            }}
+          >
+            Pricing Plans
+          </h2>
         </div>
 
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">

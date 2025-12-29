@@ -65,9 +65,10 @@ export function TryItOutSection() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 sm:mb-12 md:mb-16">
           <h2 
-            className="text-3xl sm:text-4xl md:text-5xl font-bold px-4 text-blue-600"
+            className="text-3xl sm:text-4xl md:text-5xl font-bold px-4"
             style={{
-              textShadow: '2px 2px 0px rgba(34, 211, 238, 0.4), 1px 1px 0px rgba(34, 211, 238, 0.3)'
+              color: '#14b8a6',
+              textShadow: '2px 2px 0px rgba(20, 184, 166, 0.4), 1px 1px 0px rgba(20, 184, 166, 0.3)'
             }}
           >
             Try It Out
