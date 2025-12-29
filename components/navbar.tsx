@@ -71,9 +71,12 @@ export function Navbar() {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
             <Github className="h-5 w-5 sm:h-6 sm:w-6" />
-            <Link href="/" className="text-base sm:text-lg font-semibold">
-              <span className="hidden sm:inline">PracticeCursor Github Analyzer</span>
-              <span className="sm:hidden">PracticeCursor</span>
+            <Link href="/" className="text-base sm:text-lg font-bold">
+              <span className="hidden sm:inline-block font-bold">
+                <span className="block font-bold">PracticeCursor</span>
+                <span className="block font-bold">Github Analyzer</span>
+              </span>
+              <span className="sm:hidden font-bold">PracticeCursor</span>
             </Link>
           </div>
 

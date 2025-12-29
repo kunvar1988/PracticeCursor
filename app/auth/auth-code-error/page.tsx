@@ -1,3 +1,11 @@
+/**
+ * AUTH ERROR PAGE - Route: /auth/auth-code-error
+ * 
+ * This page displays authentication errors when OAuth/login fails.
+ * It shows user-friendly error messages and provides options to retry or go home.
+ * 
+ * URL: http://localhost:3000/auth/auth-code-error?error=AccessDenied
+ */
 "use client";
 
 import Link from "next/link";

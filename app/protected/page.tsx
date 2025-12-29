@@ -1,3 +1,16 @@
+/**
+ * PROTECTED PAGE - Route: /protected
+ * 
+ * This page validates API keys and shows access status.
+ * Users are redirected here from the playground after entering an API key.
+ * 
+ * Features:
+ * - Validates API key from sessionStorage
+ * - Shows success/error messages
+ * - Redirects to playground if no key provided
+ * 
+ * URL: http://localhost:3000/protected
+ */
 "use client";
 
 import { useEffect, useState, useRef } from "react";

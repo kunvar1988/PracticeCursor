@@ -1,3 +1,13 @@
+/**
+ * API PLAYGROUND PAGE - Route: /playground
+ * 
+ * This page allows users to:
+ * - Enter an API key for testing
+ * - Validate API keys before using them
+ * - Navigate to protected page after validation
+ * 
+ * URL: http://localhost:3000/playground
+ */
 "use client";
 
 import { useState } from "react";

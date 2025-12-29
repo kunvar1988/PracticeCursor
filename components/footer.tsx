@@ -91,7 +91,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-border/40 text-center text-sm text-muted-foreground">
-          <p>© 2025 PracticeCursor. All rights reserved.</p>
+          <p>©2026 PracticeCursor. All rights reserved.</p>
         </div>
       </div>
     </footer>
