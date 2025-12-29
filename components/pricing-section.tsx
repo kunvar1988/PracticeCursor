@@ -32,7 +32,7 @@ export function PricingSection() {
     <section id="pricing" className="bg-gray-50 py-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-5xl font-bold text-black">Pricing Plans</h2>
+          <h2 className="text-5xl font-bold text-blue-600">Pricing Plans</h2>
         </div>
 
         <div className="max-w-4xl mx-auto space-y-6">
@@ -60,7 +60,7 @@ export function PricingSection() {
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button size="lg" className="w-full">
+                <Button size="lg" className="w-full bg-black text-white hover:bg-gray-800">
                   {plan.cta}
                 </Button>
               </CardFooter>

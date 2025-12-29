@@ -24,7 +24,7 @@ export function FeaturesSection() {
     <section id="features" className="bg-gray-100">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-16">
-          <h2 className="text-5xl font-bold text-black">Key Features</h2>
+          <h2 className="text-5xl font-bold text-blue-600">Key Features</h2>
         </div>
 
         <div className="max-w-4xl mx-auto space-y-6">

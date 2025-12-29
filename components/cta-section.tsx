@@ -11,11 +11,14 @@ export function CTASection() {
           repositories.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Button size="lg" className="w-full sm:w-auto gap-2">
+          <Button size="lg" variant="blue" className="w-full sm:w-auto gap-2">
             Start Analyzing Repositories
             <ArrowRight className="h-4 w-4" />
           </Button>
-          <Button size="lg" variant="outline" className="w-full sm:w-auto">
+          <Button 
+            size="lg" 
+            className="w-full sm:w-auto bg-white text-blue-600 border-2 border-blue-600 hover:bg-blue-50"
+          >
             View Documentation
           </Button>
         </div>
