@@ -12,7 +12,9 @@ BEGIN
   ) THEN
     ALTER TABLE api_keys ADD COLUMN environment TEXT;
     
-    -- Set default value for existing rows
+    -- Set default value for existing rows (only for rows that are NULL)
+    -- This migration runs once, so existing rows will be set to 'unknown'
+    -- New rows will have their environment set during creation
     UPDATE api_keys SET environment = 'unknown' WHERE environment IS NULL;
     
     -- Create index on environment for faster filtering

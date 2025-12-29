@@ -135,7 +135,13 @@ export async function updateKey(
   value?: string,
   usage?: number
 ): Promise<ApiKey | null> {
-  const updateData: Partial<Pick<ApiKeyRow, 'name' | 'key' | 'value' | 'usage' | 'updated_at'>> = {
+  // First, get the existing key to preserve environment
+  const existingKey = await getKeyById(id);
+  if (!existingKey) {
+    return null;
+  }
+
+  const updateData: any = {
     name,
     key,
     updated_at: new Date().toISOString(),
@@ -150,13 +156,34 @@ export async function updateKey(
   if (usage !== undefined) {
     updateData.usage = usage;
   }
+  
+  // Preserve existing environment value - don't overwrite it
+  // Only include environment in update if the column exists and has a value
+  if (existingKey.environment !== undefined) {
+    updateData.environment = existingKey.environment;
+  }
 
-  const { data, error } = await supabase
+  let result = await supabase
     .from('api_keys')
     .update(updateData)
     .eq('id', id)
     .select()
     .single();
+
+  // If error is PGRST204 (column not found), retry without environment
+  if (result.error && result.error.code === 'PGRST204' && existingKey.environment !== undefined) {
+    const updateDataWithoutEnv = { ...updateData };
+    delete updateDataWithoutEnv.environment;
+    
+    result = await supabase
+      .from('api_keys')
+      .update(updateDataWithoutEnv)
+      .eq('id', id)
+      .select()
+      .single();
+  }
+
+  const { data, error } = result;
 
   if (error) {
     if (error.code === 'PGRST116') {
