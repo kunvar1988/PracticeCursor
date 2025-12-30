@@ -15,6 +15,16 @@ export async function getUserIdFromToken(request: NextRequest): Promise<string |
       secret: authOptions.secret 
     });
 
+    // Log for debugging in production
+    if (process.env.NODE_ENV === "production") {
+      console.log("[Auth Helper] Token check:", {
+        hasToken: !!token,
+        hasSub: !!token?.sub,
+        cookies: request.cookies.getAll().map(c => c.name),
+        url: request.url,
+      });
+    }
+
     if (!token?.sub) {
       return null;
     }

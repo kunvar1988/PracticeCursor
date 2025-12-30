@@ -250,6 +250,8 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === "development",
+  // Ensure cookies work in production (Vercel uses HTTPS)
+  useSecureCookies: process.env.NEXTAUTH_URL?.startsWith("https://") === true || process.env.NODE_ENV === "production",
 };
 
 // Create NextAuth handler
