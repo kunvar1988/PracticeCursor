@@ -44,11 +44,23 @@ export function useApiKeys() {
       if (response.ok) {
         const data = await response.json();
         // Add default type and usage if not present
-        const keysWithDefaults = data.map((key: ApiKey) => ({
-          ...key,
-          type: key.type || "dev",
-          usage: key.usage ?? 0,
-        }));
+        // Map "dev" to "local" and "prod" to "Prod" for display
+        const keysWithDefaults = data.map((key: ApiKey) => {
+          let displayType = key.type || "local";
+          // Normalize old "dev" keys to "local" for display
+          if (displayType === "dev") {
+            displayType = "local";
+          }
+          // Capitalize "prod" to "Prod" for display
+          if (displayType === "prod") {
+            displayType = "Prod";
+          }
+          return {
+            ...key,
+            type: displayType,
+            usage: key.usage ?? 0,
+          };
+        });
         setApiKeys(keysWithDefaults);
       } else if (response.status === 401) {
         console.error("Unauthorized: Please sign in");

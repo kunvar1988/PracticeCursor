@@ -95,10 +95,10 @@ export default function ApiKeyModal({
                   Key Type — Choose the environment for this key
                 </label>
                 <div className="space-y-3">
-                  {/* Development Option */}
+                  {/* Local/Development Option */}
                   <label
                     className={`flex items-start gap-4 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
-                      formData.keyType === "dev"
+                      formData.keyType === "local" || formData.keyType === "dev"
                         ? "border-blue-500 bg-blue-50"
                         : "border-gray-200 bg-white hover:border-gray-300"
                     }`}
@@ -106,8 +106,8 @@ export default function ApiKeyModal({
                     <input
                       type="radio"
                       name="keyType"
-                      value="dev"
-                      checked={formData.keyType === "dev"}
+                      value="local"
+                      checked={formData.keyType === "local" || formData.keyType === "dev"}
                       onChange={(e) =>
                         onFormDataChange({ ...formData, keyType: e.target.value })
                       }
@@ -133,14 +133,14 @@ export default function ApiKeyModal({
                         <div>
                           <div
                             className={`font-semibold ${
-                              formData.keyType === "dev" ? "text-gray-900" : "text-gray-500"
+                              formData.keyType === "local" || formData.keyType === "dev" ? "text-gray-900" : "text-gray-500"
                             }`}
                           >
-                            Development
+                            Local
                           </div>
                           <div
                             className={`text-sm ${
-                              formData.keyType === "dev" ? "text-gray-600" : "text-gray-400"
+                              formData.keyType === "local" || formData.keyType === "dev" ? "text-gray-600" : "text-gray-400"
                             }`}
                           >
                             Rate limited to 100 requests/minute
@@ -191,7 +191,7 @@ export default function ApiKeyModal({
                               formData.keyType === "prod" ? "text-gray-900" : "text-gray-500"
                             }`}
                           >
-                            Production
+                            Prod
                           </div>
                           <div
                             className={`text-sm ${

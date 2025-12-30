@@ -4,10 +4,21 @@ import { useApiKeys } from "./useApiKeys";
 import { ApiKey, FormData } from "../types/apiKey";
 import { generateApiKeyValue } from "../lib/utils";
 
+// Detect environment and set default key type
+function getDefaultKeyType(): string {
+  if (typeof window === "undefined") return "local";
+  
+  const hostname = window.location.hostname;
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    return "local";
+  }
+  return "prod";
+}
+
 const initialFormData: FormData = {
   name: "",
   key: "",
-  keyType: "dev",
+  keyType: getDefaultKeyType(),
   limitMonthly: false,
   monthlyLimit: "",
 };
@@ -27,13 +38,15 @@ export function useDashboard() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const generatedKey = formData.key || generateApiKeyValue(formData.keyType);
+      // Use the form's keyType, which is already set based on environment
+      const keyType = formData.keyType || getDefaultKeyType();
+      const generatedKey = formData.key || generateApiKeyValue(keyType);
       const success = await createApiKey({
         name: formData.name,
         key: generatedKey,
         value: generatedKey,
         usage: 0,
-        type: formData.keyType,
+        type: keyType,
       });
 
       if (success) {
@@ -100,7 +113,7 @@ export function useDashboard() {
     setFormData({
       name: key.name,
       key: key.key,
-      keyType: key.type || "dev",
+      keyType: key.type || getDefaultKeyType(),
       limitMonthly: false,
       monthlyLimit: "",
     });
