@@ -1,14 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as storage from "../storage";
+import { requireAuth } from "../auth-helper";
 
-// GET - Fetch a specific API key
+// GET - Fetch a specific API key for authenticated user
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authResult = await requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
+    const { userId } = authResult;
     const { id } = await params;
- const apiKey = await storage.getKeyById(id);
+    const apiKey = await storage.getKeyById(id, userId);
 
     if (!apiKey) {
       return NextResponse.json(
@@ -26,12 +33,18 @@ export async function GET(
   }
 }
 
-// PUT - Update an API key
+// PUT - Update an API key for authenticated user
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authResult = await requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
+    const { userId } = authResult;
     const { id } = await params;
     const body = await request.json();
     const { name, key, value, usage } = body;
@@ -46,7 +59,7 @@ export async function PUT(
     // If key is not provided, fetch the existing key to preserve it
     let keyToUpdate = key;
     if (!keyToUpdate) {
-      const existingKey = await storage.getKeyById(id);
+      const existingKey = await storage.getKeyById(id, userId);
       if (!existingKey) {
         return NextResponse.json(
           { error: "API key not found" },
@@ -56,7 +69,7 @@ export async function PUT(
       keyToUpdate = existingKey.key;
     }
 
-    const updatedKey = await storage.updateKey(id, name, keyToUpdate, value, usage);
+    const updatedKey = await storage.updateKey(id, name, keyToUpdate, userId, value, usage);
 
     if (!updatedKey) {
       return NextResponse.json(
@@ -81,14 +94,20 @@ export async function PUT(
   }
 }
 
-// DELETE - Delete an API key
+// DELETE - Delete an API key for authenticated user
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authResult = await requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
+    const { userId } = authResult;
     const { id } = await params;
-    const deleted = await storage.deleteKey(id);
+    const deleted = await storage.deleteKey(id, userId);
 
     if (!deleted) {
       return NextResponse.json(

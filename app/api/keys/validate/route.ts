@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "../../../lib/supabaseClient";
+import { createClient } from "../../../lib/supabaseServer";
+import { requireAuth } from "../auth-helper";
 
-// POST - Validate an API key
+// POST - Validate an API key for authenticated user
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
+    const { userId } = authResult;
+    const supabase = await createClient();
     const body = await request.json();
-    const key = body.key || body.apiKey;
+    const key = (body.key || body.apiKey)?.trim();
 
     if (!key) {
       return NextResponse.json(
@@ -14,13 +22,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if the key exists in the database
+    // Check if the key exists in the database for this user
     // We check both 'key' and 'value' fields since value might contain the actual key
     // First try to find by 'key' field
     let { data, error } = await supabase
       .from('api_keys')
       .select('id, name, key, value, usage')
-      .eq('key', key)
+      .eq('key', key.trim())
+      .eq('user_id', userId)
       .maybeSingle();
 
     // If not found by 'key', try 'value' field
@@ -28,11 +37,21 @@ export async function POST(request: NextRequest) {
       const result = await supabase
         .from('api_keys')
         .select('id, name, key, value, usage')
-        .eq('value', key)
+        .eq('value', key.trim())
+        .eq('user_id', userId)
         .maybeSingle();
       data = result.data;
       error = result.error;
     }
+
+    // Log for debugging
+    console.log("[Validate] Key validation attempt:", {
+      userId,
+      keyLength: key.length,
+      keyPrefix: key.substring(0, 8) + "...",
+      found: !!data,
+      error: error?.message,
+    });
 
     if (error || !data) {
       // Key not found
@@ -49,7 +68,8 @@ export async function POST(request: NextRequest) {
         usage: (data.usage ?? 0) + 1,
         last_used: new Date().toISOString()
       })
-      .eq('id', data.id);
+      .eq('id', data.id)
+      .eq('user_id', userId);
 
     return NextResponse.json({
       valid: true,

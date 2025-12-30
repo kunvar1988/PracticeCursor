@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as storage from "./storage";
+import { requireAuth } from "./auth-helper";
 
-// GET - Fetch all API keys
-export async function GET() {
+// GET - Fetch all API keys for authenticated user
+export async function GET(request: NextRequest) {
   try {
-    const apiKeys = await storage.getAllKeys();
+    const authResult = await requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
+    const { userId } = authResult;
+    const apiKeys = await storage.getAllKeys(userId);
     return NextResponse.json(apiKeys);
   } catch (error: unknown) {
     console.error("Error fetching API keys:", error);
@@ -21,9 +28,15 @@ export async function GET() {
   }
 }
 
-// POST - Create a new API key
+// POST - Create a new API key for authenticated user
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+
+    const { userId } = authResult;
     const body = await request.json();
     const { name, key, value, usage, environment } = body;
 
@@ -37,7 +50,7 @@ export async function POST(request: NextRequest) {
     // Determine environment: use provided, or detect from request
     const env = environment || process.env.NODE_ENV || (process.env.VERCEL_ENV === 'production' ? 'production' : 'development');
 
-    const newApiKey = await storage.createKey(name, key, value, usage, env);
+    const newApiKey = await storage.createKey(name, key, userId, value, usage, env);
     return NextResponse.json(newApiKey, { status: 201 });
   } catch (error: unknown) {
     console.error("Error creating API key:", error);

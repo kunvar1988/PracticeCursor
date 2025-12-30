@@ -59,21 +59,31 @@ export default function ProtectedPage() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include", // Include cookies for authentication
         body: JSON.stringify({ key }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to validate API key");
-      }
-
       const result = await response.json();
+      
+      // Check for authentication errors
+      if (response.status === 401) {
+        setIsValid(false);
+        showError("Authentication required. Please sign in to validate API keys.");
+        sessionStorage.removeItem("apiKeyToValidate");
+        return;
+      }
+      
+      // Check for other errors
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to validate API key");
+      }
       
       setIsValid(result.valid);
       
       if (result.valid) {
         showSuccess("Valid API key, /protected can be accessed");
       } else {
-        showError("Invalid API key");
+        showError(result.message || "Invalid API key");
       }
 
       // Clear the sessionStorage after validation

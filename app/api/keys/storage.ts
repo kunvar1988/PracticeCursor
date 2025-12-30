@@ -1,6 +1,6 @@
 // Database storage for API keys using Supabase
 
-import { supabase } from '../../lib/supabaseClient';
+import { createClient } from '../../lib/supabaseServer';
 
 export interface ApiKey {
   id: string;
@@ -40,10 +40,12 @@ function rowToApiKey(row: ApiKeyRow): ApiKey {
   };
 }
 
-export async function getAllKeys(): Promise<ApiKey[]> {
+export async function getAllKeys(userId: string): Promise<ApiKey[]> {
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('api_keys')
     .select('*')
+    .eq('user_id', userId)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -54,11 +56,13 @@ export async function getAllKeys(): Promise<ApiKey[]> {
   return data ? data.map(rowToApiKey) : [];
 }
 
-export async function getKeyById(id: string): Promise<ApiKey | undefined> {
+export async function getKeyById(id: string, userId: string): Promise<ApiKey | undefined> {
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('api_keys')
     .select('*')
     .eq('id', id)
+    .eq('user_id', userId)
     .single();
 
   if (error) {
@@ -73,11 +77,20 @@ export async function getKeyById(id: string): Promise<ApiKey | undefined> {
   return data ? rowToApiKey(data) : undefined;
 }
 
-export async function createKey(name: string, key: string, value?: string, usage?: number, environment?: string): Promise<ApiKey> {
+export async function createKey(
+  name: string,
+  key: string,
+  userId: string,
+  value?: string,
+  usage?: number,
+  environment?: string
+): Promise<ApiKey> {
+  const supabase = await createClient();
   // Build insert object
   const insertData: any = {
     name,
     key,
+    user_id: userId,
     value: value || key, // Use provided value or default to key
     usage: usage ?? 0, // Default to 0 if not provided
   };
@@ -132,11 +145,13 @@ export async function updateKey(
   id: string,
   name: string,
   key: string,
+  userId: string,
   value?: string,
   usage?: number
 ): Promise<ApiKey | null> {
-  // First, get the existing key to preserve environment
-  const existingKey = await getKeyById(id);
+  const supabase = await createClient();
+  // First, get the existing key to preserve environment and verify ownership
+  const existingKey = await getKeyById(id, userId);
   if (!existingKey) {
     return null;
   }
@@ -167,6 +182,7 @@ export async function updateKey(
     .from('api_keys')
     .update(updateData)
     .eq('id', id)
+    .eq('user_id', userId)
     .select()
     .single();
 
@@ -179,6 +195,7 @@ export async function updateKey(
       .from('api_keys')
       .update(updateDataWithoutEnv)
       .eq('id', id)
+      .eq('user_id', userId)
       .select()
       .single();
   }
@@ -197,11 +214,13 @@ export async function updateKey(
   return data ? rowToApiKey(data) : null;
 }
 
-export async function deleteKey(id: string): Promise<boolean> {
+export async function deleteKey(id: string, userId: string): Promise<boolean> {
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('api_keys')
     .delete()
     .eq('id', id)
+    .eq('user_id', userId)
     .select();
 
   if (error) {

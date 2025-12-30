@@ -1,13 +1,34 @@
 import { useState, useEffect } from "react";
 import { ApiKey } from "../types/apiKey";
+import { useSession } from "next-auth/react";
+
+/**
+ * Helper function to make authenticated API requests
+ * NextAuth cookies are automatically sent with fetch requests
+ */
+async function authenticatedFetch(url: string, options: RequestInit = {}) {
+  // NextAuth stores JWT in cookies, which are automatically sent with fetch
+  // The server will verify the JWT from cookies using getToken
+  const response = await fetch(url, {
+    ...options,
+    credentials: "include", // Ensure cookies are sent
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+
+  return response;
+}
 
 export function useApiKeys() {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(true);
+  const { data: session } = useSession();
 
   const fetchApiKeys = async () => {
     try {
-      const response = await fetch("/api/keys");
+      const response = await authenticatedFetch("/api/keys");
       if (response.ok) {
         const data = await response.json();
         // Add default type and usage if not present
@@ -17,6 +38,8 @@ export function useApiKeys() {
           usage: key.usage ?? 0,
         }));
         setApiKeys(keysWithDefaults);
+      } else if (response.status === 401) {
+        console.error("Unauthorized: Please sign in");
       }
     } catch (error) {
       console.error("Error fetching API keys:", error);
@@ -26,8 +49,13 @@ export function useApiKeys() {
   };
 
   useEffect(() => {
-    fetchApiKeys();
-  }, []);
+    if (session) {
+      fetchApiKeys();
+    } else {
+      setLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session]);
 
   const createApiKey = async (data: {
     name: string;
@@ -44,9 +72,8 @@ export function useApiKeys() {
             : 'production')
         : 'production';
 
-      const response = await fetch("/api/keys", {
+      const response = await authenticatedFetch("/api/keys", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
           environment, // Include environment in the request
@@ -66,9 +93,8 @@ export function useApiKeys() {
 
   const updateApiKey = async (id: string, data: { name: string; key: string }): Promise<boolean> => {
     try {
-      const response = await fetch(`/api/keys/${id}`, {
+      const response = await authenticatedFetch(`/api/keys/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 
@@ -85,7 +111,7 @@ export function useApiKeys() {
 
   const deleteApiKey = async (id: string): Promise<boolean> => {
     try {
-      const response = await fetch(`/api/keys/${id}`, {
+      const response = await authenticatedFetch(`/api/keys/${id}`, {
         method: "DELETE",
       });
 
