@@ -250,8 +250,6 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === "development",
-  // Trust the host header in production (required for Vercel)
-  trustHost: true,
 };
 
 // Create NextAuth handler
