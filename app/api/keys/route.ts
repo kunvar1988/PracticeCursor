@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     const { userId } = authResult;
     const body = await request.json();
-    const { name, key, value, usage, environment } = body;
+    const { name, key, value, usage, environment, limit } = body;
 
     if (!name || !key) {
       return NextResponse.json(
@@ -50,7 +50,10 @@ export async function POST(request: NextRequest) {
     // Determine environment: use provided, or detect from request
     const env = environment || process.env.NODE_ENV || (process.env.VERCEL_ENV === 'production' ? 'production' : 'development');
 
-    const newApiKey = await storage.createKey(name, key, userId, value, usage, env);
+    // Parse limit: convert to number if provided, otherwise null
+    const parsedLimit = limit !== undefined && limit !== null ? Number(limit) : null;
+
+    const newApiKey = await storage.createKey(name, key, userId, value, usage, env, parsedLimit);
     return NextResponse.json(newApiKey, { status: 201 });
   } catch (error: unknown) {
     console.error("Error creating API key:", error);

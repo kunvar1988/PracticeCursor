@@ -108,6 +108,7 @@ export function useApiKeys() {
     value: string;
     usage: number;
     type: string;
+    limit?: number | null;
   }): Promise<boolean> => {
     try {
       // Detect environment: localhost = 'local', otherwise 'production'

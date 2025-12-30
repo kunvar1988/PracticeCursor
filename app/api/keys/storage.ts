@@ -8,6 +8,7 @@ export interface ApiKey {
   key: string;
   value?: string;
   usage?: number;
+  limit?: number | null;
   environment?: string;
   createdAt: string;
   lastUsed?: string;
@@ -20,6 +21,7 @@ interface ApiKeyRow {
   key: string;
   value?: string;
   usage?: number;
+  limit?: number | null;
   environment?: string;
   created_at: string;
   last_used?: string;
@@ -34,6 +36,7 @@ function rowToApiKey(row: ApiKeyRow): ApiKey {
     key: row.key,
     value: row.value || row.key, // Fallback to key if value is not set
     usage: row.usage ?? 0,
+    limit: row.limit ?? null,
     environment: row.environment || undefined,
     createdAt: row.created_at,
     lastUsed: row.last_used || undefined,
@@ -83,7 +86,8 @@ export async function createKey(
   userId: string,
   value?: string,
   usage?: number,
-  environment?: string
+  environment?: string,
+  limit?: number | null
 ): Promise<ApiKey> {
   const supabase = await createClient();
   // Build insert object
@@ -99,6 +103,11 @@ export async function createKey(
   // Try to insert with environment, but if it fails due to missing column, retry without it
   if (environment !== undefined) {
     insertData.environment = environment;
+  }
+
+  // Add limit if provided (null means unlimited, undefined means not set)
+  if (limit !== undefined) {
+    insertData.limit = limit;
   }
 
   let data, error;

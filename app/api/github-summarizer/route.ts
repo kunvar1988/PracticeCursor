@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase, validateSupabaseConfig } from "../../lib/supabaseClient";
+import { validateSupabaseConfig } from "../../lib/supabaseClient";
 import { summarizeRepoChain } from "./chain";
+import { validateApiKey, checkAndIncrementUsage } from "../keys/rate-limit";
 
 
 // POST - GitHub Summarizer endpoint with API key validation
@@ -31,62 +32,18 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-    // Get API key from x-api-key header
-    let key = request.headers.get('x-api-key');
-    
-    // Extract key from Authorization header (supports "Bearer <key>" or just "<key>")
-    if (!key) {
-      const authHeader = request.headers.get('Authorization');
-      if (authHeader) {
-        key = authHeader.startsWith('Bearer ') 
-          ? authHeader.substring(7) 
-          : authHeader;
-      }
+
+    // Validate API key
+    const validationResult = await validateApiKey(request);
+    if (!validationResult.success) {
+      return validationResult.response;
     }
 
-    if (!key) {
-      return NextResponse.json(
-        { error: "API key is required", valid: false },
-        { status: 400 }
-      );
+    // Check rate limit and increment usage
+    const usageResult = await checkAndIncrementUsage(validationResult.apiKey);
+    if (!usageResult.success) {
+      return usageResult.response;
     }
-
-    // Check if the key exists in the database
-    // We check both 'key' and 'value' fields since value might contain the actual key
-    // First try to find by 'key' field
-    let { data, error } = await supabase
-      .from('api_keys')
-      .select('id, name, key, value, usage')
-      .eq('key', key)
-      .maybeSingle();
-
-    // If not found by 'key', try 'value' field
-    if (!data && !error) {
-      const result = await supabase
-        .from('api_keys')
-        .select('id, name, key, value, usage')
-        .eq('value', key)
-        .maybeSingle();
-      data = result.data;
-      error = result.error;
-    }
-
-    if (error || !data) {
-      // Key not found
-      return NextResponse.json(
-        { valid: false, message: "Invalid API key" },
-        { status: 401 }
-      );
-    }
-
-    // Key is valid - update usage count
-    await supabase
-      .from('api_keys')
-      .update({ 
-        usage: (data.usage ?? 0) + 1,
-        last_used: new Date().toISOString()
-      })
-      .eq('id', data.id);
 
     // Parse request body to get GitHub URL
     const body = await request.json();

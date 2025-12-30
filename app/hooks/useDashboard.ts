@@ -41,12 +41,19 @@ export function useDashboard() {
       // Use the form's keyType, which is already set based on environment
       const keyType = formData.keyType || getDefaultKeyType();
       const generatedKey = formData.key || generateApiKeyValue(keyType);
+      
+      // Parse limit: if limitMonthly is checked and monthlyLimit is provided, use it; otherwise null
+      const limit = formData.limitMonthly && formData.monthlyLimit 
+        ? parseInt(formData.monthlyLimit, 10) 
+        : null;
+      
       const success = await createApiKey({
         name: formData.name,
         key: generatedKey,
         value: generatedKey,
         usage: 0,
         type: keyType,
+        limit: limit,
       });
 
       if (success) {
