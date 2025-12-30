@@ -50,6 +50,7 @@ export function useApiKeys() {
           
           // If type is not stored, infer it from the key prefix
           if (!displayType) {
+            // Use value if available, otherwise fall back to key
             const keyValue = key.value || key.key || "";
             if (keyValue.startsWith("prod-")) {
               displayType = "prod";

@@ -2,6 +2,7 @@ export interface ApiKey {
   id: string;
   name: string;
   key: string;
+  value?: string;
   type?: string;
   usage?: number;
   environment?: string;
