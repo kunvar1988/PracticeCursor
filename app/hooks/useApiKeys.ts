@@ -44,9 +44,28 @@ export function useApiKeys() {
       if (response.ok) {
         const data = await response.json();
         // Add default type and usage if not present
-        // Map "dev" to "local" and "prod" to "Prod" for display
+        // Infer type from key prefix if not stored in database
         const keysWithDefaults = data.map((key: ApiKey) => {
-          let displayType = key.type || "local";
+          let displayType = key.type;
+          
+          // If type is not stored, infer it from the key prefix
+          if (!displayType) {
+            const keyValue = key.value || key.key || "";
+            if (keyValue.startsWith("prod-")) {
+              displayType = "prod";
+            } else if (keyValue.startsWith("local-") || keyValue.startsWith("test-dev-") || keyValue.startsWith("test-local-")) {
+              displayType = "local";
+            } else if (keyValue.startsWith("test-prod-")) {
+              displayType = "prod";
+            } else {
+              // Default based on environment
+              const isProduction = typeof window !== "undefined" && 
+                window.location.hostname !== "localhost" && 
+                window.location.hostname !== "127.0.0.1";
+              displayType = isProduction ? "prod" : "local";
+            }
+          }
+          
           // Normalize old "dev" keys to "local" for display
           if (displayType === "dev") {
             displayType = "local";
@@ -55,6 +74,7 @@ export function useApiKeys() {
           if (displayType === "prod") {
             displayType = "Prod";
           }
+          
           return {
             ...key,
             type: displayType,
