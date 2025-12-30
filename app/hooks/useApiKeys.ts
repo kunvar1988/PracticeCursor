@@ -11,12 +11,24 @@ async function authenticatedFetch(url: string, options: RequestInit = {}) {
   // The server will verify the JWT from cookies using getToken
   const response = await fetch(url, {
     ...options,
-    credentials: "include", // Ensure cookies are sent
+    credentials: "include", // Ensure cookies are sent (critical for production)
     headers: {
       "Content-Type": "application/json",
       ...options.headers,
     },
+    // Ensure cookies are sent in cross-origin requests
+    mode: "cors",
   });
+
+  // Log authentication failures for debugging
+  if (!response.ok && response.status === 401) {
+    console.error("[authenticatedFetch] Authentication failed:", {
+      url,
+      status: response.status,
+      statusText: response.statusText,
+      cookies: document.cookie ? document.cookie.split(';').map(c => c.trim().split('=')[0]) : 'No cookies',
+    });
+  }
 
   return response;
 }
