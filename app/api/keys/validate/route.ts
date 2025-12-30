@@ -1,16 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "../../../lib/supabaseServer";
-import { requireAuth } from "../auth-helper";
+import { getUserIdFromToken } from "../auth-helper";
 
-// POST - Validate an API key for authenticated user
+// POST - Validate an API key (works with or without authentication)
+// If authenticated: validates key for the specific user
+// If not authenticated: validates if key exists in database (useful for Postman/testing)
 export async function POST(request: NextRequest) {
   try {
-    const authResult = await requireAuth(request);
-    if (authResult instanceof NextResponse) {
-      return authResult;
-    }
-
-    const { userId } = authResult;
     const supabase = await createClient();
     const body = await request.json();
     const key = (body.key || body.apiKey)?.trim();
@@ -22,31 +18,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if the key exists in the database for this user
-    // We check both 'key' and 'value' fields since value might contain the actual key
-    // First try to find by 'key' field
-    let { data, error } = await supabase
+    // Try to get userId if authenticated (optional)
+    const userId = await getUserIdFromToken(request);
+    
+    // Build query - if authenticated, filter by user_id; otherwise check all keys
+    let query = supabase
       .from('api_keys')
-      .select('id, name, key, value, usage')
-      .eq('key', key.trim())
-      .eq('user_id', userId)
-      .maybeSingle();
+      .select('id, name, key, value, usage, user_id');
+    
+    // First try to find by 'key' field
+    query = query.eq('key', key.trim());
+    if (userId) {
+      query = query.eq('user_id', userId);
+    }
+    
+    let { data, error } = await query.maybeSingle();
 
     // If not found by 'key', try 'value' field
     if (!data && !error) {
-      const result = await supabase
+      let valueQuery = supabase
         .from('api_keys')
-        .select('id, name, key, value, usage')
-        .eq('value', key.trim())
-        .eq('user_id', userId)
-        .maybeSingle();
+        .select('id, name, key, value, usage, user_id')
+        .eq('value', key.trim());
+      
+      if (userId) {
+        valueQuery = valueQuery.eq('user_id', userId);
+      }
+      
+      const result = await valueQuery.maybeSingle();
       data = result.data;
       error = result.error;
     }
 
     // Log for debugging
     console.log("[Validate] Key validation attempt:", {
-      userId,
+      userId: userId || "unauthenticated",
       keyLength: key.length,
       keyPrefix: key.substring(0, 8) + "...",
       found: !!data,
@@ -62,14 +68,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Key is valid - optionally update usage count
-    await supabase
+    const updateQuery = supabase
       .from('api_keys')
       .update({ 
         usage: (data.usage ?? 0) + 1,
         last_used: new Date().toISOString()
       })
-      .eq('id', data.id)
-      .eq('user_id', userId);
+      .eq('id', data.id);
+    
+    if (userId) {
+      updateQuery.eq('user_id', userId);
+    }
+    
+    await updateQuery;
 
     return NextResponse.json({
       valid: true,
