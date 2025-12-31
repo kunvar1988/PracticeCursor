@@ -31,7 +31,7 @@ export function useDashboard() {
   const [payAsYouGo, setPayAsYouGo] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [duplicateNameError, setDuplicateNameError] = useState<string | null>(null);
-  // Sidebar starts closed on mobile, but will be always visible on desktop (lg+) via CSS
+  // Sidebar state - can be toggled on both mobile and desktop
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
   const { toast, showSuccess, showError, hideToast } = useToast();

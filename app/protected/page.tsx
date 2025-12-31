@@ -101,7 +101,7 @@ export default function ProtectedPage() {
   return (
     <>
       <div className="min-h-screen bg-white flex">
-        <Sidebar isOpen={sidebarOpen} />
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       {/* Overlay for mobile */}
       {sidebarOpen && (
         <div
@@ -109,12 +109,12 @@ export default function ProtectedPage() {
           onClick={() => setSidebarOpen(false)}
         />
       )}
-      <div className="flex-1 w-full lg:ml-64">
-        {/* Toggle Button - Mobile Only */}
+      <div className={`flex-1 w-full transition-all duration-300 ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-0'}`}>
+        {/* Toggle Button - Mobile and Desktop */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className={`lg:hidden fixed top-16 sm:top-4 z-50 p-2 sm:p-2.5 bg-white rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition-all duration-300 touch-manipulation ${
-            sidebarOpen ? "left-[260px]" : "left-4"
+          className={`fixed top-16 sm:top-4 lg:top-4 z-50 p-2 sm:p-2.5 bg-white rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition-all duration-300 touch-manipulation ${
+            sidebarOpen ? "left-[260px] lg:left-[260px]" : "left-4 lg:left-4"
           }`}
           aria-label="Toggle sidebar"
         >

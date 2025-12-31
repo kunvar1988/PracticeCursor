@@ -37,13 +37,13 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-white flex relative">
-      <Sidebar isOpen={sidebarOpen} />
-      <main className={`flex-1 w-full transition-all duration-300 ${sidebarOpen ? 'ml-64 lg:ml-64' : 'ml-0 lg:ml-64'} relative z-10 bg-white`}>
-        {/* Toggle Button - Mobile Only */}
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <main className={`flex-1 w-full transition-all duration-300 ${sidebarOpen ? 'ml-64 lg:ml-64' : 'ml-0 lg:ml-0'} relative z-10 bg-white`}>
+        {/* Toggle Button - Mobile and Desktop */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className={`lg:hidden fixed top-16 sm:top-20 z-50 p-2 sm:p-2.5 bg-white rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition-all duration-300 touch-manipulation ${
-            sidebarOpen ? "left-[260px]" : "left-4"
+          className={`fixed top-16 sm:top-20 lg:top-4 z-50 p-2 sm:p-2.5 bg-white rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition-all duration-300 touch-manipulation ${
+            sidebarOpen ? "left-[260px] lg:left-[260px]" : "left-4 lg:left-4"
           }`}
           aria-label="Toggle sidebar"
         >
@@ -73,7 +73,7 @@ export default function Dashboard() {
         />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-6 pt-20 sm:pt-24 lg:pt-6 bg-white min-h-screen">
           <Header />
-          <PlanCard payAsYouGo={payAsYouGo} onPayAsYouGoToggle={setPayAsYouGo} />
+          <PlanCard payAsYouGo={payAsYouGo} onPayAsYouGoToggle={setPayAsYouGo} apiKeys={apiKeys} />
 
           {/* API Keys Section */}
           <div className="bg-white rounded-lg border border-gray-200">
