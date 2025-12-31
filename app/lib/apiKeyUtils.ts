@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "../../lib/supabaseClient";
+import { supabase } from "./supabaseClient";
 
 export interface ApiKeyData {
   id: string;
@@ -38,7 +38,7 @@ export type UsageCheckResponse = UsageCheckResult | UsageCheckError;
  * Extracts API key from request headers
  * Supports both 'x-api-key' header and 'Authorization' header (Bearer token or plain)
  */
-export function extractApiKey(request: NextRequest): string | null {
+function extractApiKey(request: NextRequest): string | null {
   // Get API key from x-api-key header
   let key = request.headers.get('x-api-key');
   
@@ -60,15 +60,6 @@ export function extractApiKey(request: NextRequest): string | null {
  * 
  * @param request - The NextRequest object containing headers
  * @returns ApiKeyValidationResponse with either API key data or error response
- * 
- * @example
- * ```typescript
- * const validationResult = await validateApiKey(request);
- * if (!validationResult.success) {
- *   return validationResult.response; // NextResponse with error (400 or 401)
- * }
- * // Use validationResult.apiKey for further processing
- * ```
  */
 export async function validateApiKey(
   request: NextRequest
@@ -155,26 +146,13 @@ export async function validateApiKey(
 }
 
 /**
- * Checks rate limit and increments usage counter for a validated API key
+ * Increments usage counter for a validated API key
+ * This is an alias for checkAndIncrementUsage for consistency
  * 
  * @param apiKey - The validated API key data from validateApiKey()
  * @returns UsageCheckResponse with either updated API key data or rate limit error
- * 
- * @example
- * ```typescript
- * const validationResult = await validateApiKey(request);
- * if (!validationResult.success) {
- *   return validationResult.response;
- * }
- * 
- * const usageResult = await checkAndIncrementUsage(validationResult.apiKey);
- * if (!usageResult.success) {
- *   return usageResult.response; // NextResponse with 429 error
- * }
- * // Use usageResult.apiKey for processing (usage has been incremented)
- * ```
  */
-export async function checkAndIncrementUsage(
+export async function incrementApiKeyUsage(
   apiKey: ApiKeyData
 ): Promise<UsageCheckResponse> {
   const currentUsage = apiKey.usage;

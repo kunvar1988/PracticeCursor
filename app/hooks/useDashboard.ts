@@ -43,9 +43,19 @@ export function useDashboard() {
       const generatedKey = formData.key || generateApiKeyValue(keyType);
       
       // Parse limit: if limitMonthly is checked and monthlyLimit is provided, use it; otherwise null
-      const limit = formData.limitMonthly && formData.monthlyLimit 
-        ? parseInt(formData.monthlyLimit, 10) 
-        : null;
+      let limit: number | null = null;
+      if (formData.limitMonthly && formData.monthlyLimit && formData.monthlyLimit.trim() !== '') {
+        const parsed = parseInt(formData.monthlyLimit.trim(), 10);
+        if (!isNaN(parsed) && parsed > 0) {
+          limit = parsed;
+        }
+      }
+      
+      console.log('Creating API key with limit from form:', { 
+        limitMonthly: formData.limitMonthly, 
+        monthlyLimit: formData.monthlyLimit, 
+        parsedLimit: limit 
+      });
       
       const success = await createApiKey({
         name: formData.name,

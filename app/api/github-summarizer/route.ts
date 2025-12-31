@@ -1,10 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
-import { validateSupabaseConfig } from "../../lib/supabaseClient";
-import { summarizeRepoChain } from "./chain";
-import { validateApiKey, checkAndIncrementUsage } from "../keys/rate-limit";
+import { NextRequest, NextResponse } from 'next/server';
+import { summarizeReadme } from './chain';
+import { validateApiKey, incrementApiKeyUsage } from '../../lib/apiKeyUtils';
+import { getRepoInfo } from '../../lib/githubUtils';
+import { getReadmeContent } from './github-utils';
 
-
-// POST - GitHub Summarizer endpoint with API key validation
+/**
+ * Public demo endpoint for "Try It Out" section
+ * This endpoint doesn't require API key authentication
+ * but has rate limiting considerations for production
+ */
 export async function POST(request: NextRequest) {
   try {
     // Validate environment variables at runtime
@@ -19,34 +23,59 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate Supabase configuration at runtime
+    // Check if API key is provided (optional for public demo, required for authenticated requests)
+    const apiKeyHeader = request.headers.get('x-api-key') || request.headers.get('Authorization');
+    
+    // Debug logging (remove in production)
+    console.log('[GitHub Summarizer] API Key check:', {
+      hasXApiKey: !!request.headers.get('x-api-key'),
+      hasAuthorization: !!request.headers.get('Authorization'),
+      apiKeyHeader: apiKeyHeader ? `${apiKeyHeader.substring(0, 10)}...` : null,
+      allHeaders: Object.fromEntries(request.headers.entries())
+    });
+    
+    // If API key is provided, validate and enforce rate limits
+    if (apiKeyHeader && apiKeyHeader.trim()) {
+      const validationResult = await validateApiKey(request);
+      if (!validationResult.success) {
+        console.log('[GitHub Summarizer] API Key validation failed');
+        return validationResult.response;
+      }
+
+      console.log('[GitHub Summarizer] API Key validated, checking rate limit:', {
+        usage: validationResult.apiKey.usage,
+        limit: validationResult.apiKey.limit,
+        willExceed: validationResult.apiKey.usage >= (validationResult.apiKey.limit || Infinity)
+      });
+
+      // Check rate limit and increment usage BEFORE processing the request
+      const usageResult = await incrementApiKeyUsage(validationResult.apiKey);
+      if (!usageResult.success) {
+        console.log('[GitHub Summarizer] Rate limit exceeded - returning error response');
+        // Ensure the response is properly formatted
+        return usageResult.response;
+      }
+
+      console.log('[GitHub Summarizer] Rate limit check passed, new usage:', usageResult.apiKey.usage);
+    } else {
+      console.log('[GitHub Summarizer] No API key provided, proceeding without rate limiting');
+    }
+    // If no API key is provided, allow the request to proceed (public demo mode)
+
+    // Parse request body to get GitHub URL
+    let body;
     try {
-      validateSupabaseConfig();
-    } catch (error) {
+      body = await request.json();
+    } catch (parseError) {
       return NextResponse.json(
         { 
           valid: false,
-          error: "Supabase configuration error",
-          details: error instanceof Error ? error.message : "Missing Supabase environment variables"
+          error: "Invalid JSON format in request payload",
+          details: "Please ensure your request body is valid JSON."
         },
-        { status: 500 }
+        { status: 400 }
       );
     }
-
-    // Validate API key
-    const validationResult = await validateApiKey(request);
-    if (!validationResult.success) {
-      return validationResult.response;
-    }
-
-    // Check rate limit and increment usage
-    const usageResult = await checkAndIncrementUsage(validationResult.apiKey);
-    if (!usageResult.success) {
-      return usageResult.response;
-    }
-
-    // Parse request body to get GitHub URL
-    const body = await request.json();
     const githubUrl = body.githubUrl || body.url;
 
     if (!githubUrl) {
@@ -58,7 +87,6 @@ export async function POST(request: NextRequest) {
 
     // Fetch README content
     const readmeContent = await getReadmeContent(githubUrl);
-    console.log(readmeContent);
     
     if (!readmeContent) {
       return NextResponse.json(
@@ -68,7 +96,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Use the chain to summarize the repository
-    const result = await summarizeRepoChain.invoke({
+    const result = await summarizeReadme.invoke({
       readmeContent: readmeContent,
     });
 
@@ -103,42 +131,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-/**
- * Fetches the README.md content for a given GitHub repository URL.
- * 
- * @param {string} githubUrl - The URL of the GitHub repository, e.g., https://github.com/owner/repo
- * @returns {Promise<string | null>} The README content as plain text, or null if not found/error.
- */
-async function getReadmeContent(githubUrl: string): Promise<string | null> {
-  try {
-    // Parse the GitHub repository owner and name from the URL
-    // Supports URLs like: https://github.com/owner/repo, with or without trailing slash
-    const match = githubUrl.match(/^https:\/\/github\.com\/([^\/]+)\/([^\/]+)(\/|$)/);
-    if (!match) {
-      return null;
-    }
-    const owner = match[1];
-    const repo = match[2];
-
-    // Try main branch first, then fallback to master if needed
-    const branches = ['main', 'master'];
-    let response, rawContent;
-    for (const branch of branches) {
-      // The raw content URL
-      const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/README.md`;
-      response = await fetch(rawUrl);
-      if (response.ok) {
-        rawContent = await response.text();
-        return rawContent;
-      }
-    }
-    // If not found in either branch, return null
-    return null;
-  } catch (e) {
-    // Log error only in development for debugging
-    // console.error("Error fetching README.md:", e);
-    return null;
-  }
-}
-
 

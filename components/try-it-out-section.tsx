@@ -8,6 +8,7 @@ export function TryItOutSection() {
   const [requestPayload, setRequestPayload] = useState(`{
   "githubUrl": "https://github.com/assafelovic/gpt-researcher"
 }`)
+  const [apiKey, setApiKey] = useState<string>("")
   const [response, setResponse] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -27,19 +28,31 @@ export function TryItOutSection() {
         return
       }
 
-      // Use the public demo endpoint that doesn't require authentication
-      const apiResponse = await fetch("/api/github-summarizer/demo", {
+      // Build headers - include API key if provided
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      }
+      
+      if (apiKey.trim()) {
+        headers["x-api-key"] = apiKey.trim()
+      }
+
+      // Use the public demo endpoint (API key optional for rate limiting)
+      const apiResponse = await fetch("/api/github-summarizer", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify(payload),
       })
 
       const data = await apiResponse.json()
 
       if (!apiResponse.ok) {
-        setError(data.error || data.details || "Failed to process request")
+        // For rate limit errors (429), show the specific error message
+        if (apiResponse.status === 429 && data.error === "Rate limit exceeded") {
+          setError(data.message || data.error)
+        } else {
+          setError(data.error || data.message || data.details || "Failed to process request")
+        }
         setResponse(JSON.stringify(data, null, 2))
       } else {
         setResponse(JSON.stringify(data, null, 2))
@@ -83,6 +96,18 @@ export function TryItOutSection() {
               <p className="text-sm sm:text-base text-gray-600">Edit the payload and send a request</p>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col px-4 sm:px-6 pb-4 sm:pb-6">
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  API Key (Optional - for rate limiting)
+                </label>
+                <input
+                  type="text"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder="Enter API key to test rate limiting..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                />
+              </div>
               <textarea
                 value={requestPayload}
                 onChange={(e) => setRequestPayload(e.target.value)}

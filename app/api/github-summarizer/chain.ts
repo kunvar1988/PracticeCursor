@@ -38,3 +38,6 @@ const structuredLlm = llm.withStructuredOutput(repoSummarySchema);
 
 // Create the chain with structured output bound to the model
 export const summarizeRepoChain = prompt.pipe(structuredLlm);
+
+// Export as summarizeReadme for compatibility
+export const summarizeReadme = summarizeRepoChain;

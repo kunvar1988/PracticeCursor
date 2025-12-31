@@ -50,8 +50,16 @@ export async function POST(request: NextRequest) {
     // Determine environment: use provided, or detect from request
     const env = environment || process.env.NODE_ENV || (process.env.VERCEL_ENV === 'production' ? 'production' : 'development');
 
-    // Parse limit: convert to number if provided, otherwise null
-    const parsedLimit = limit !== undefined && limit !== null ? Number(limit) : null;
+    // Parse limit: convert to number if provided and valid, otherwise null
+    let parsedLimit: number | null = null;
+    if (limit !== undefined && limit !== null && limit !== '') {
+      const numLimit = typeof limit === 'string' ? parseInt(limit, 10) : Number(limit);
+      if (!isNaN(numLimit) && numLimit > 0) {
+        parsedLimit = numLimit;
+      }
+    }
+    
+    console.log('Creating API key with limit:', { limit, parsedLimit, env, limitType: typeof limit });
 
     const newApiKey = await storage.createKey(name, key, userId, value, usage, env, parsedLimit);
     return NextResponse.json(newApiKey, { status: 201 });

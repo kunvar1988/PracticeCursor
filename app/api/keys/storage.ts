@@ -106,9 +106,20 @@ export async function createKey(
   }
 
   // Add limit if provided (null means unlimited, undefined means not set)
+  // Since "limit" is a reserved keyword in SQL, Supabase should handle quoting automatically
+  // But we need to ensure the value is properly set
   if (limit !== undefined) {
+    // Explicitly set limit - null means unlimited, number means limited
+    // Ensure it's a number or null, not undefined
     insertData.limit = limit;
   }
+  
+  console.log('Inserting API key with data:', { 
+    name: insertData.name, 
+    hasLimit: limit !== undefined, 
+    limitValue: limit,
+    limitType: typeof limit 
+  });
 
   let data, error;
   
