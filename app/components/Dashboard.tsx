@@ -18,6 +18,8 @@ export default function Dashboard() {
     sidebarOpen,
     apiKeys,
     loading,
+    isCreating,
+    duplicateNameError,
     toast,
     setFormData,
     setPayAsYouGo,
@@ -30,6 +32,7 @@ export default function Dashboard() {
     copyKey,
     closeModal,
     hideToast,
+    setDuplicateNameError,
   } = useDashboard();
 
   return (
@@ -153,6 +156,9 @@ export default function Dashboard() {
             onClose={closeModal}
             onSubmit={editingKey ? handleUpdate : handleCreate}
             onFormDataChange={setFormData}
+            isCreating={isCreating}
+            duplicateNameError={duplicateNameError}
+            onClearDuplicateError={() => setDuplicateNameError(null)}
           />
         </div>
       </main>

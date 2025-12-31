@@ -80,6 +80,23 @@ export async function getKeyById(id: string, userId: string): Promise<ApiKey | u
   return data ? rowToApiKey(data) : undefined;
 }
 
+export async function checkDuplicateName(name: string, userId: string): Promise<boolean> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('api_keys')
+    .select('id')
+    .eq('name', name)
+    .eq('user_id', userId)
+    .limit(1);
+
+  if (error) {
+    console.error('Error checking duplicate name:', error);
+    throw error;
+  }
+
+  return data !== null && data.length > 0;
+}
+
 export async function createKey(
   name: string,
   key: string,

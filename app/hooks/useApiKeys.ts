@@ -109,7 +109,7 @@ export function useApiKeys() {
     usage: number;
     type: string;
     limit?: number | null;
-  }): Promise<boolean> => {
+  }): Promise<{ success: boolean; error?: string; errorMessage?: string }> => {
     try {
       // Detect environment: localhost = 'local', otherwise 'production'
       const environment = typeof window !== 'undefined' 
@@ -128,12 +128,37 @@ export function useApiKeys() {
 
       if (response.ok) {
         await fetchApiKeys();
-        return true;
+        return { success: true };
       }
-      return false;
+      
+      // Try to parse error response
+      let errorMessage = "Failed to create API key";
+      let errorCode: string | undefined;
+      
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorMessage;
+        errorCode = errorData.code;
+        
+        // Log duplicate name errors for debugging
+        if (errorCode === 'DUPLICATE_NAME') {
+          console.log('Duplicate API key name detected:', errorMessage);
+        }
+      } catch {
+        // If JSON parsing fails, use default message
+      }
+      
+      return { 
+        success: false, 
+        error: errorCode,
+        errorMessage 
+      };
     } catch (error) {
       console.error("Error creating API key:", error);
-      return false;
+      return { 
+        success: false, 
+        errorMessage: "Failed to create API key. Please try again." 
+      };
     }
   };
 

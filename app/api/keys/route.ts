@@ -47,6 +47,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check for duplicate name
+    const isDuplicate = await storage.checkDuplicateName(name, userId);
+    if (isDuplicate) {
+      return NextResponse.json(
+        { 
+          error: "An API key with this name already exists",
+          code: "DUPLICATE_NAME"
+        },
+        { status: 409 }
+      );
+    }
+
     // Determine environment: use provided, or detect from request
     const env = environment || process.env.NODE_ENV || (process.env.VERCEL_ENV === 'production' ? 'production' : 'development');
 

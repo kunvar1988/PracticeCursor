@@ -29,6 +29,8 @@ export function useDashboard() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [payAsYouGo, setPayAsYouGo] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [duplicateNameError, setDuplicateNameError] = useState<string | null>(null);
   // Sidebar starts closed on mobile, but will be always visible on desktop (lg+) via CSS
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
@@ -37,6 +39,14 @@ export function useDashboard() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent duplicate submissions
+    if (isCreating) return;
+    
+    setIsCreating(true);
+    const startTime = Date.now();
+    const minimumDelay = 1000; // 1 second in milliseconds
+    
     try {
       // Use the form's keyType, which is already set based on environment
       const keyType = formData.keyType || getDefaultKeyType();
@@ -57,25 +67,45 @@ export function useDashboard() {
         parsedLimit: limit 
       });
       
-      const success = await createApiKey({
-        name: formData.name,
-        key: generatedKey,
-        value: generatedKey,
-        usage: 0,
-        type: keyType,
-        limit: limit,
-      });
+      // Execute API call and minimum delay in parallel
+      const [result] = await Promise.all([
+        createApiKey({
+          name: formData.name,
+          key: generatedKey,
+          value: generatedKey,
+          usage: 0,
+          type: keyType,
+          limit: limit,
+        }),
+        // Ensure loader is visible for at least 1 second
+        new Promise(resolve => {
+          const elapsed = Date.now() - startTime;
+          const remaining = Math.max(0, minimumDelay - elapsed);
+          setTimeout(resolve, remaining);
+        })
+      ]);
 
-      if (success) {
+      if (result.success) {
         setShowModal(false);
         setFormData(initialFormData);
+        setDuplicateNameError(null);
         showSuccess("API key created successfully!");
       } else {
-        showError("Failed to create API key. Please try again.");
+        // Check if it's a duplicate name error
+        if (result.error === 'DUPLICATE_NAME') {
+          const errorMsg = "An API key with this name already exists. Please choose a different name.";
+          setDuplicateNameError(errorMsg);
+          showError("⚠️ " + errorMsg);
+        } else {
+          setDuplicateNameError(null);
+          showError(result.errorMessage || "Failed to create API key. Please try again.");
+        }
       }
     } catch (error) {
       console.error("Error creating API key:", error);
       showError("Failed to create API key. Please try again.");
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -122,6 +152,7 @@ export function useDashboard() {
   const openCreateModal = () => {
     setEditingKey(null);
     setFormData(initialFormData);
+    setDuplicateNameError(null);
     setShowModal(true);
   };
 
@@ -148,6 +179,7 @@ export function useDashboard() {
     setShowModal(false);
     setEditingKey(null);
     setFormData(initialFormData);
+    setDuplicateNameError(null);
   };
 
   return {
@@ -160,6 +192,8 @@ export function useDashboard() {
     sidebarOpen,
     apiKeys,
     loading,
+    isCreating,
+    duplicateNameError,
     toast,
     
     // Actions
@@ -174,6 +208,7 @@ export function useDashboard() {
     copyKey,
     closeModal,
     hideToast,
+    setDuplicateNameError,
   };
 }
 
