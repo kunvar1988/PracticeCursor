@@ -28,12 +28,12 @@ export default function ApiKeyModal({
   if (!showModal) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-lg shadow-xl max-w-lg w-full p-6 sm:p-8 my-auto max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4 sm:p-6 overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl max-w-lg w-full p-4 sm:p-6 md:p-8 my-auto max-h-[90vh] overflow-y-auto">
         {editingKey ? (
           // Edit Modal (simpler version)
           <>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Edit API Key</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Edit API Key</h2>
             <form onSubmit={onSubmit} className="space-y-4">
               <div>
                 <label
@@ -47,15 +47,15 @@ export default function ApiKeyModal({
                   id="edit-name"
                   value={formData.name}
                   onChange={(e) => onFormDataChange({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm sm:text-base focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
               </div>
-              <div className="flex gap-3 pt-4">
+              <div className="flex flex-col sm:flex-row gap-3 pt-4">
                 <button
                   type="submit"
                   disabled={isCreating}
-                  className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 active:bg-purple-800 transition-colors font-medium text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
                 >
                   Update
                 </button>
@@ -63,7 +63,7 @@ export default function ApiKeyModal({
                   type="button"
                   onClick={onClose}
                   disabled={isCreating}
-                  className="flex-1 px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2.5 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors font-medium text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
                 >
                   Cancel
                 </button>
@@ -73,8 +73,8 @@ export default function ApiKeyModal({
         ) : (
           // Create Modal (full design)
           <>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Create a new API key</h2>
-            <p className="text-sm text-gray-600 mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Create a new API key</h2>
+            <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
               Enter a name and limit for the new API key.
             </p>
             <form onSubmit={onSubmit} className="space-y-6">
@@ -98,7 +98,7 @@ export default function ApiKeyModal({
                     }
                   }}
                   placeholder="Key Name"
-                  className={`w-full px-4 py-2 border-2 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  className={`w-full px-3 sm:px-4 py-2 border-2 rounded-lg bg-white text-gray-900 text-sm sm:text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                     duplicateNameError 
                       ? "border-red-500 focus:border-red-500 focus:ring-red-500" 
                       : "border-blue-500"
@@ -135,10 +135,10 @@ export default function ApiKeyModal({
                 <div className="space-y-3">
                   {/* Local/Development Option */}
                   <label
-                    className={`flex items-start gap-4 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
+                    className={`flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-colors touch-manipulation ${
                       formData.keyType === "local" || formData.keyType === "dev"
                         ? "border-blue-500 bg-blue-50"
-                        : "border-gray-200 bg-white hover:border-gray-300"
+                        : "border-gray-200 bg-white hover:border-gray-300 active:bg-gray-50"
                     }`}
                   >
                     <input
@@ -190,10 +190,10 @@ export default function ApiKeyModal({
 
                   {/* Production Option */}
                   <label
-                    className={`flex items-start gap-4 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
+                    className={`flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border-2 cursor-pointer transition-colors touch-manipulation ${
                       formData.keyType === "prod"
                         ? "border-blue-500 bg-blue-50"
-                        : "border-gray-200 bg-white hover:border-gray-300"
+                        : "border-gray-200 bg-white hover:border-gray-300 active:bg-gray-50"
                     }`}
                   >
                     <input
@@ -266,7 +266,7 @@ export default function ApiKeyModal({
                       onFormDataChange({ ...formData, monthlyLimit: e.target.value })
                     }
                     placeholder="1000"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm sm:text-base focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 )}
               </div>
@@ -278,11 +278,11 @@ export default function ApiKeyModal({
               </p>
 
               {/* Action Buttons */}
-              <div className="flex gap-3 pt-4">
+              <div className="flex flex-col sm:flex-row gap-3 pt-4">
                 <button
                   type="submit"
                   disabled={isCreating}
-                  className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[42px]"
+                  className="flex-1 px-4 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 active:bg-purple-800 transition-colors font-medium text-sm sm:text-base disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px] touch-manipulation"
                 >
                   {isCreating ? (
                     <>
@@ -316,7 +316,7 @@ export default function ApiKeyModal({
                   type="button"
                   onClick={onClose}
                   disabled={isCreating}
-                  className="flex-1 px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2.5 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors font-medium text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
                 >
                   Cancel
                 </button>

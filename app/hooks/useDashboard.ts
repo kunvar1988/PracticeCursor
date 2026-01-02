@@ -31,8 +31,8 @@ export function useDashboard() {
   const [payAsYouGo, setPayAsYouGo] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [duplicateNameError, setDuplicateNameError] = useState<string | null>(null);
-  // Sidebar state - can be toggled on both mobile and desktop
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Sidebar state - starts open by default, can be toggled on both mobile and desktop
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   
   const { toast, showSuccess, showError, hideToast } = useToast();
   const { apiKeys, loading, createApiKey, updateApiKey, deleteApiKey } = useApiKeys();

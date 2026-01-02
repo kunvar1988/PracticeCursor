@@ -137,7 +137,7 @@ export function Navbar() {
                       </span>
                     </div>
                   )}
-                  <span className="text-blue-600 font-medium hidden sm:inline">
+                  <span className="text-blue-600 font-medium hidden lg:inline">
                     {session.user.name || session.user.email?.split("@")[0] || "User"}
                   </span>
                   <button
@@ -185,7 +185,7 @@ export function Navbar() {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-border py-4 space-y-4">
-            <div className="flex flex-col space-y-2">
+            <div className="flex flex-row gap-2 px-4 justify-center">
               <Link 
                 href="#features" 
                 className="px-4 py-2 text-sm text-foreground hover:bg-gray-50 rounded-lg transition-colors"

@@ -114,18 +114,18 @@ export function TryItOutSection() {
                 className="w-full h-48 sm:h-64 p-4 border border-gray-300 rounded-lg font-mono text-sm resize-y focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                 placeholder='{\n  "githubUrl": "https://github.com/owner/repo"\n}'
               />
-              <div className="flex gap-3 mt-4">
+              <div className="flex flex-col sm:flex-row gap-3 mt-4">
                 <Button
                   onClick={handleSendRequest}
                   disabled={isLoading}
-                  className="flex-1 bg-black text-white hover:bg-gray-800"
+                  className="flex-1 bg-black text-white hover:bg-gray-800 active:bg-gray-900 touch-manipulation"
                 >
                   {isLoading ? "Sending..." : "Send Request"}
                 </Button>
                 <Button
                   onClick={handleDocumentation}
                   variant="outline"
-                  className="flex-1 border-gray-300 text-black hover:bg-gray-50"
+                  className="flex-1 border-gray-300 text-black hover:bg-gray-50 active:bg-gray-100 touch-manipulation"
                 >
                   Documentation
                 </Button>

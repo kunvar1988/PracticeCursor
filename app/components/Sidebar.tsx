@@ -14,9 +14,10 @@ interface NavItem {
 interface SidebarProps {
   isOpen: boolean;
   onClose?: () => void;
+  onToggle?: () => void;
 }
 
-export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+export default function Sidebar({ isOpen, onClose, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const [isPersonalOpen, setIsPersonalOpen] = useState(false);
 
@@ -113,14 +114,47 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   return (
     <>
-      {/* Desktop Sidebar - Conditionally visible */}
-      <div className={`hidden lg:flex fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 flex-col z-40 transition-transform duration-300 ease-in-out ${
-        isOpen ? "translate-x-0" : "-translate-x-full"
-      }`}>
-        {/* Logo */}
-        <div className="px-4 py-6 border-b border-gray-200">
-          <div className="flex items-center gap-2">
+      {/* Desktop Sidebar - Toggleable on large screens */}
+      <div className={`hidden lg:flex fixed left-0 top-0 h-screen bg-white border-r border-gray-200 flex-col z-30 transition-all duration-300 ease-in-out ${
+        isOpen ? "w-64" : "w-12"
+      } overflow-hidden`}>
+        {/* Toggle button when sidebar is closed on desktop */}
+        {!isOpen && onToggle && (
+          <button
+            onClick={onToggle}
+            className="absolute top-4 left-2 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors z-40"
+            aria-label="Open sidebar"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
+        )}
+        {/* Logo with Close Button */}
+        <div className={`px-4 py-8 border-b border-gray-200 ${!isOpen ? 'opacity-0 pointer-events-none' : ''} transition-opacity duration-300`}>
+          <div className="flex items-center justify-between gap-2">
             <span className="text-lg font-semibold text-gray-900 whitespace-nowrap">PracticeCursor AI</span>
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+                aria-label="Close sidebar"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
 
@@ -148,8 +182,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         </div> */}
 
         {/* Navigation Links */}
-        <nav className="flex-1 px-4 py-4 overflow-y-auto">
-          <ul className="space-y-1">
+        <nav className={`flex-1 px-4 py-6 overflow-y-auto ${!isOpen ? 'opacity-0 pointer-events-none' : ''} transition-opacity duration-300`}>
+          <ul className="space-y-2">
             {navItems.map((item) => {
               const active = isActive(item.href);
               const NavLink = item.external ? "a" : Link;
@@ -182,15 +216,31 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         </nav>
       </div>
 
-      {/* Mobile Sidebar - Pushes content */}
-      <div className={`lg:hidden fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 flex flex-col transition-transform duration-300 ease-in-out z-40 ${
-        isOpen ? "translate-x-0" : "-translate-x-full"
+      {/* Mobile Sidebar - Pushes content to the right */}
+      <div className={`lg:hidden h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out flex-shrink-0 overflow-hidden ${
+        isOpen ? "w-64" : "w-0 border-0"
       }`}>
-        {/* Logo */}
-        <div className="px-4 py-6 border-b border-gray-200">
+        {/* Logo with Close Button */}
+        <div className="px-4 py-6 border-b border-gray-200 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-lg font-semibold text-gray-900 whitespace-nowrap">PracticeCursor AI</span>
           </div>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors touch-manipulation flex-shrink-0"
+              aria-label="Close sidebar"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          )}
         </div>
 
         {/* Personal Section */}
@@ -217,8 +267,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         </div> */}
 
         {/* Navigation Links */}
-        <nav className="flex-1 px-4 py-4 overflow-y-auto">
-          <ul className="space-y-1">
+        <nav className="flex-1 px-4 py-6 overflow-y-auto">
+          <ul className="space-y-2">
             {navItems.map((item) => {
               const active = isActive(item.href);
               const NavLink = item.external ? "a" : Link;
@@ -230,6 +280,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <li key={item.name}>
                   <NavLink
                     {...linkProps}
+                    onClick={() => {
+                      // Close sidebar on mobile when link is clicked
+                      if (onClose && typeof window !== 'undefined' && window.innerWidth < 1024) {
+                        onClose();
+                      }
+                    }}
                     className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                       active
                         ? "bg-purple-50 text-purple-600"

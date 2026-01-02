@@ -28,9 +28,9 @@ export default function ApiKeysTable({
   return (
     <>
       {/* Mobile Card View */}
-      <div className="md:hidden space-y-4 p-4">
+      <div className="md:hidden space-y-4 p-4 sm:p-6">
         {apiKeys.map((key) => (
-          <div key={key.id} className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
+          <div key={key.id} className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 space-y-3">
             <div className="flex items-start justify-between">
               <div className="flex-1 min-w-0">
                 <h4 className="text-sm font-semibold text-gray-900 truncate">{key.name}</h4>
@@ -43,9 +43,9 @@ export default function ApiKeysTable({
               </div>
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">Key:</span>
-                <span className="text-xs text-gray-600 font-mono truncate flex-1 ml-2 text-right">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs text-gray-500 flex-shrink-0">Key:</span>
+                <span className="text-xs text-gray-600 font-mono truncate flex-1 text-right break-all">
                   {showKey[key.id] ? key.key : maskKey(key.key)}
                 </span>
               </div>
@@ -157,46 +157,47 @@ export default function ApiKeysTable({
       </div>
 
       {/* Desktop Table View */}
-      <div className="hidden md:block overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                NAME
-              </th>
-              <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                TYPE
-              </th>
-              <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                USAGE
-              </th>
-              <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                KEY
-              </th>
-              <th className="px-4 lg:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                OPTIONS
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
-            {apiKeys.map((key) => (
-              <tr key={key.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {key.name}
-                </td>
-                <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                  <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium">
-                    {key.type}
-                  </span>
-                </td>
-                <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                  {key.usage ?? 0}
-                </td>
-                <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono max-w-xs truncate">
-                  {showKey[key.id] ? key.key : maskKey(key.key)}
-                </td>
-                <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-right text-sm">
-                  <div className="flex items-center justify-end gap-2 lg:gap-3">
+      <div className="hidden md:block overflow-x-auto -mx-4 sm:mx-0">
+        <div className="inline-block min-w-full align-middle">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-3 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  NAME
+                </th>
+                <th className="px-3 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  TYPE
+                </th>
+                <th className="px-3 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  USAGE
+                </th>
+                <th className="px-3 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  KEY
+                </th>
+                <th className="px-3 sm:px-4 lg:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  OPTIONS
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 bg-white">
+              {apiKeys.map((key) => (
+                <tr key={key.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {key.name}
+                  </td>
+                  <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium">
+                      {key.type}
+                    </span>
+                  </td>
+                  <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    {key.usage ?? 0}
+                  </td>
+                  <td className="px-3 sm:px-4 lg:px-6 py-4 text-sm text-gray-600 font-mono max-w-[200px] sm:max-w-xs truncate">
+                    {showKey[key.id] ? key.key : maskKey(key.key)}
+                  </td>
+                  <td className="px-3 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-right text-sm">
+                    <div className="flex items-center justify-end gap-1.5 sm:gap-2 lg:gap-3">
                     <button
                       onClick={() => toggleShowKey(key.id)}
                       className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors touch-manipulation"
@@ -303,6 +304,7 @@ export default function ApiKeysTable({
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </>
   );
