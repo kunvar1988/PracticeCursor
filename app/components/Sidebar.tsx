@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import { useState } from "react";
 
 interface NavItem {
@@ -19,7 +21,9 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onClose, onToggle }: SidebarProps) {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const [isPersonalOpen, setIsPersonalOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const navItems: NavItem[] = [
     {
@@ -214,6 +218,59 @@ export default function Sidebar({ isOpen, onClose, onToggle }: SidebarProps) {
             })}
           </ul>
         </nav>
+
+        {/* User Profile Section - Bottom */}
+        {session?.user && (
+          <div className={`px-4 py-4 border-t border-gray-200 ${!isOpen ? 'opacity-0 pointer-events-none' : ''} transition-opacity duration-300`}>
+            <div className="bg-white rounded-lg p-3 mb-3">
+              <div className="flex items-center gap-3">
+                {session.user.image ? (
+                  <Image
+                    src={session.user.image}
+                    alt={session.user.name || "User"}
+                    width={48}
+                    height={48}
+                    className="rounded-full flex-shrink-0"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
+                    <span className="text-white font-semibold text-base">
+                      {session.user.name?.[0]?.toUpperCase() || session.user.email?.[0]?.toUpperCase() || "U"}
+                    </span>
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-base font-bold text-gray-900 truncate">
+                    {session.user.name || session.user.email?.split("@")[0] || "User"}
+                  </p>
+                  {session.user.email && (
+                    <p className="text-sm text-gray-600 truncate">
+                      {session.user.email}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={async () => {
+                try {
+                  setIsSigningOut(true);
+                  await signOut({ 
+                    callbackUrl: "/",
+                    redirect: true 
+                  });
+                } catch (error) {
+                  console.error("[Sidebar] Sign out error:", error);
+                  setIsSigningOut(false);
+                }
+              }}
+              disabled={isSigningOut}
+              className="w-full px-3 py-2.5 text-sm font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSigningOut ? "Signing out..." : "Logout"}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Mobile Sidebar - Pushes content to the right */}
@@ -305,6 +362,59 @@ export default function Sidebar({ isOpen, onClose, onToggle }: SidebarProps) {
             })}
           </ul>
         </nav>
+
+        {/* User Profile Section - Bottom */}
+        {session?.user && (
+          <div className="px-4 py-4 border-t border-gray-200">
+            <div className="bg-white rounded-lg p-3 mb-3">
+              <div className="flex items-center gap-3">
+                {session.user.image ? (
+                  <Image
+                    src={session.user.image}
+                    alt={session.user.name || "User"}
+                    width={48}
+                    height={48}
+                    className="rounded-full flex-shrink-0"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
+                    <span className="text-white font-semibold text-base">
+                      {session.user.name?.[0]?.toUpperCase() || session.user.email?.[0]?.toUpperCase() || "U"}
+                    </span>
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-base font-bold text-gray-900 truncate">
+                    {session.user.name || session.user.email?.split("@")[0] || "User"}
+                  </p>
+                  {session.user.email && (
+                    <p className="text-sm text-gray-600 truncate">
+                      {session.user.email}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={async () => {
+                try {
+                  setIsSigningOut(true);
+                  await signOut({ 
+                    callbackUrl: "/",
+                    redirect: true 
+                  });
+                } catch (error) {
+                  console.error("[Sidebar] Sign out error:", error);
+                  setIsSigningOut(false);
+                }
+              }}
+              disabled={isSigningOut}
+              className="w-full px-3 py-2.5 text-sm font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSigningOut ? "Signing out..." : "Logout"}
+            </button>
+          </div>
+        )}
       </div>
     </>
   );
