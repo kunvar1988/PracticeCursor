@@ -63,11 +63,11 @@ export function GitHubResponseDisplay({ response, error }: GitHubResponseDisplay
       )}
 
       {/* Repository Metadata Section */}
-      {(response.stars !== null || response.latestVersion || response.websiteUrl || response.licenseType) && (
+      {(response.stars != null || response.latestVersion || response.websiteUrl || response.licenseType) && (
         <div className="pt-4 border-t border-gray-200">
           <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Repository Details</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {response.stars !== null && (
+            {response.stars != null && (
               <div>
                 <span className="text-sm font-medium text-gray-600">Stars:</span>
                 <span className="ml-2 text-sm sm:text-base text-gray-900">{response.stars.toLocaleString()}</span>
