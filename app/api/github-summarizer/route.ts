@@ -95,15 +95,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Use the chain to summarize the repository
-    const result = await summarizeReadme.invoke({
-      readmeContent: readmeContent,
-    });
+    // Fetch repository info (stars, latestVersion, websiteUrl, license) and summarize in parallel
+    const [result, repoInfo] = await Promise.all([
+      summarizeReadme.invoke({
+        readmeContent: readmeContent,
+      }),
+      getRepoInfo(githubUrl)
+    ]);
 
-    // Return the summarized result
+    // Return the summarized result with repository metadata
     return NextResponse.json({
       valid: true,
-      ...result
+      ...result,
+      stars: repoInfo?.stars ?? null,
+      latestVersion: repoInfo?.latestVersion ?? null,
+      websiteUrl: repoInfo?.websiteUrl ?? null,
+      licenseType: repoInfo?.license ?? null
     });
   } catch (error: unknown) {
     // Return a more specific error message

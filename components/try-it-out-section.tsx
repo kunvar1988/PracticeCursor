@@ -1,19 +1,50 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { AuthPromptModal } from "@/components/auth-prompt-modal"
+import { GitHubResponseDisplay } from "@/components/github-response-display"
+
+interface GitHubResponse {
+  valid: boolean;
+  summary?: string;
+  cool_facts?: string[];
+  stars?: number | null;
+  latestVersion?: string | null;
+  websiteUrl?: string | null;
+  licenseType?: string | null;
+  error?: string;
+  details?: string;
+}
 
 export function TryItOutSection() {
   const [requestPayload, setRequestPayload] = useState(`{
   "githubUrl": "https://github.com/assafelovic/gpt-researcher"
 }`)
   const [apiKey, setApiKey] = useState<string>("")
-  const [response, setResponse] = useState<string | null>(null)
+  const [response, setResponse] = useState<GitHubResponse | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const router = useRouter()
+  const { data: session, status } = useSession()
 
   const handleSendRequest = async () => {
+    // Check authentication status
+    if (status === "loading") {
+      return // Wait for session to load
+    }
+
+    if (!session) {
+      // User is not authenticated, show prompt modal
+      setShowAuthModal(true)
+      return
+    }
+
+    // User is authenticated, make API call
     setIsLoading(true)
     setError(null)
     setResponse(null)
@@ -44,28 +75,40 @@ export function TryItOutSection() {
         body: JSON.stringify(payload),
       })
 
-      const data = await apiResponse.json()
+      const data: GitHubResponse = await apiResponse.json()
 
-      if (!apiResponse.ok) {
-        // For rate limit errors (429), show the specific error message
-        if (apiResponse.status === 429 && data.error === "Rate limit exceeded") {
-          setError(data.message || data.error)
-        } else {
-          setError(data.error || data.message || data.details || "Failed to process request")
-        }
-        setResponse(JSON.stringify(data, null, 2))
+      if (!apiResponse.ok || !data.valid) {
+        // Store the error response to show as JSON
+        setResponse(data)
+        setError(data.error || data.details || "Failed to process request")
       } else {
-        setResponse(JSON.stringify(data, null, 2))
+        setResponse(data)
+        setError(null)
       }
     } catch (err) {
-      if (err instanceof SyntaxError) {
-        setError("Invalid JSON format in request payload")
-      } else {
-        setError(err instanceof Error ? err.message : "An error occurred")
-      }
+      const errorMessage = err instanceof SyntaxError
+        ? "Invalid JSON format in request payload"
+        : err instanceof Error ? err.message : "An error occurred"
+      
+      // Create error response object for JSON display
+      setResponse({
+        valid: false,
+        error: "Failed to process request",
+        details: errorMessage
+      })
+      setError(errorMessage)
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleConfirmAuth = () => {
+    setShowAuthModal(false)
+    router.push("/login")
+  }
+
+  const handleCancelAuth = () => {
+    setShowAuthModal(false)
   }
 
   const handleDocumentation = () => {
@@ -74,8 +117,14 @@ export function TryItOutSection() {
   }
 
   return (
-    <section id="try-it-out" className="bg-gray-50 py-12 sm:py-16 md:py-20">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <>
+      <AuthPromptModal
+        isOpen={showAuthModal}
+        onConfirm={handleConfirmAuth}
+        onCancel={handleCancelAuth}
+      />
+      <section id="try-it-out" className="bg-gray-50 py-12 sm:py-16 md:py-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 sm:mb-12 md:mb-16">
           <h2 
             className="text-3xl sm:text-4xl md:text-5xl font-bold px-4"
@@ -117,10 +166,10 @@ export function TryItOutSection() {
               <div className="flex flex-col sm:flex-row gap-3 mt-4">
                 <Button
                   onClick={handleSendRequest}
-                  disabled={isLoading}
+                  disabled={isLoading || status === "loading"}
                   className="flex-1 bg-black text-white hover:bg-gray-800 active:bg-gray-900 touch-manipulation"
                 >
-                  {isLoading ? "Sending..." : "Send Request"}
+                  {isLoading ? "Loading..." : status === "loading" ? "Loading..." : "Try it out"}
                 </Button>
                 <Button
                   onClick={handleDocumentation}
@@ -139,21 +188,29 @@ export function TryItOutSection() {
               <h3 className="text-xl sm:text-2xl font-bold text-black mb-2">API Response</h3>
               <p className="text-sm sm:text-base text-gray-600">View the response from the API</p>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col px-4 sm:px-6 pb-4 sm:pb-6">
-              <textarea
-                value={response || (error ? JSON.stringify({ error }, null, 2) : "")}
-                readOnly
-                className="w-full h-48 sm:h-64 p-4 border border-gray-300 rounded-lg font-mono text-sm resize-y bg-gray-50 focus:outline-none overflow-y-auto"
-                placeholder="Response will appear here..."
-              />
-              {error && (
-                <p className="text-red-600 text-sm mt-2">{error}</p>
+            <CardContent className="flex-1 flex flex-col px-4 sm:px-6 pb-4 sm:pb-6 overflow-y-auto">
+              {isLoading ? (
+                <div className="flex items-center justify-center h-48 sm:h-64">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-2"></div>
+                    <p className="text-sm text-gray-600">Loading...</p>
+                  </div>
+                </div>
+              ) : response || error ? (
+                <div className="min-h-[200px]">
+                  <GitHubResponseDisplay response={response} error={error} />
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-48 sm:h-64 text-gray-400 text-sm">
+                  Response will appear here...
+                </div>
               )}
             </CardContent>
           </Card>
         </div>
       </div>
     </section>
+    </>
   )
 }
 

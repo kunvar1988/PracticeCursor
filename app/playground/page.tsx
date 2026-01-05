@@ -14,11 +14,16 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
+import { GitHubResponseDisplay } from "@/components/github-response-display";
 
 interface SummarizerResponse {
   valid: boolean;
   summary?: string;
   cool_facts?: string[];
+  stars?: number | null;
+  latestVersion?: string | null;
+  websiteUrl?: string | null;
+  licenseType?: string | null;
   error?: string;
   details?: string;
 }
@@ -26,7 +31,6 @@ interface SummarizerResponse {
 export default function PlaygroundPage() {
   const [apiKey, setApiKey] = useState("");
   const [githubUrl, setGithubUrl] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [summaryResult, setSummaryResult] = useState<SummarizerResponse | null>(null);
@@ -36,20 +40,6 @@ export default function PlaygroundPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!apiKey.trim()) {
-      return;
-    }
-
-    setIsSubmitting(true);
-    
-    // Store the API key in sessionStorage to pass to protected page
-    sessionStorage.setItem("apiKeyToValidate", apiKey.trim());
-    
-    // Navigate to protected page
-    router.push("/protected");
-  };
-
-  const handleSummarize = async () => {
     if (!githubUrl.trim()) {
       setError("Please enter a GitHub URL");
       return;
@@ -76,14 +66,22 @@ export default function PlaygroundPage() {
 
       const data: SummarizerResponse = await response.json();
 
-      if (!response.ok) {
-        setError(data.error || data.details || "Failed to summarize repository");
+      if (!response.ok || !data.valid) {
+        // Store the error response to show as JSON
         setSummaryResult(data);
+        setError(data.error || data.details || "Failed to summarize repository");
       } else {
         setSummaryResult(data);
+        setError(null);
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred";
+      // Create error response object for JSON display
+      setSummaryResult({
+        valid: false,
+        error: "Failed to process request",
+        details: errorMessage
+      });
       setError(errorMessage);
     } finally {
       setIsSummarizing(false);
@@ -93,6 +91,9 @@ export default function PlaygroundPage() {
   return (
     <>
       <div className="min-h-screen bg-white flex relative overflow-hidden">
+        {/* Subtle gray gradient at the very top */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 z-10"></div>
+        
         <Sidebar 
           isOpen={sidebarOpen} 
           onClose={() => setSidebarOpen(false)} 
@@ -147,113 +148,60 @@ export default function PlaygroundPage() {
             </button>
           )}
           
-          <main className="p-4 sm:p-6 md:p-8 lg:p-10 pt-16 sm:pt-20 lg:pt-8">
+          <main className="p-4 sm:p-6 md:p-8 lg:p-10 pt-16 sm:pt-20 lg:pt-8 bg-white">
             <div className="max-w-2xl mx-auto">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">API Playground</h1>
-              <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8">
-                Enter your API key and GitHub URL to test the GitHub Summarizer API.
-              </p>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">API Playground</h1>
 
-              <div className="space-y-6">
-                {/* API Key Validation Form */}
-                <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 shadow-sm">
-                  <div className="mb-4 sm:mb-6">
-                    <label htmlFor="apiKey" className="block text-sm font-medium text-gray-700 mb-2">
-                      API Key
-                    </label>
-                    <input
-                      type="text"
-                      id="apiKey"
-                      value={apiKey}
-                      onChange={(e) => setApiKey(e.target.value)}
-                      placeholder="Enter your API key"
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-sm sm:text-base"
-                      disabled={isSubmitting || isSummarizing}
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isSubmitting || isSummarizing || !apiKey.trim()}
-                    className="w-full bg-blue-600 text-white py-2.5 sm:py-3 px-4 rounded-lg font-medium hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base touch-manipulation"
-                  >
-                    {isSubmitting ? "Validating..." : "Validate API Key"}
-                  </button>
-                </form>
-
-                {/* GitHub Summarizer Section */}
-                <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 shadow-sm">
-                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">GitHub Repository Summarizer</h2>
-                  
-                  <div className="mb-4 sm:mb-6">
-                    <label htmlFor="githubUrl" className="block text-sm font-medium text-gray-700 mb-2">
-                      GitHub URL
-                    </label>
-                    <input
-                      type="url"
-                      id="githubUrl"
-                      value={githubUrl}
-                      onChange={(e) => setGithubUrl(e.target.value)}
-                      placeholder="https://github.com/owner/repo"
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors text-sm sm:text-base"
-                      disabled={isSummarizing || isSubmitting}
-                    />
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleSummarize}
-                    disabled={isSummarizing || isSubmitting || !githubUrl.trim()}
-                    className="w-full bg-green-600 text-white py-2.5 sm:py-3 px-4 rounded-lg font-medium hover:bg-green-700 active:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base touch-manipulation"
-                  >
-                    {isSummarizing ? "Summarizing..." : "Summarize Repository"}
-                  </button>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* API Key Input */}
+                <div>
+                  <label htmlFor="apiKey" className="block text-sm font-medium text-gray-700 mb-2">
+                    API Key
+                  </label>
+                  <input
+                    type="text"
+                    id="apiKey"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="Enter your API key"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white outline-none transition-colors text-sm sm:text-base"
+                    disabled={isSummarizing}
+                  />
                 </div>
 
-                {/* Results Section */}
-                {(summaryResult || error) && (
-                  <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 shadow-sm">
-                    <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Results</h2>
-                    
-                    {error && (
-                      <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-sm sm:text-base text-red-800 font-medium">Error</p>
-                        <p className="text-sm text-red-600 mt-1">{error}</p>
-                      </div>
-                    )}
+                {/* GitHub URL Input */}
+                <div>
+                  <label htmlFor="githubUrl" className="block text-sm font-medium text-gray-700 mb-2">
+                    GitHub URL
+                  </label>
+                  <input
+                    type="url"
+                    id="githubUrl"
+                    value={githubUrl}
+                    onChange={(e) => setGithubUrl(e.target.value)}
+                    placeholder="https://github.com/owner/repo"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white outline-none transition-colors text-sm sm:text-base"
+                    disabled={isSummarizing}
+                  />
+                </div>
 
-                    {summaryResult?.valid && summaryResult.summary && (
-                      <div className="space-y-4">
-                        <div>
-                          <h3 className="text-base font-semibold text-gray-900 mb-2">Summary</h3>
-                          <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                            {summaryResult.summary}
-                          </p>
-                        </div>
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={isSummarizing || !githubUrl.trim()}
+                  className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm sm:text-base shadow-sm"
+                >
+                  {isSummarizing ? "Loading..." : "Submit"}
+                </button>
+              </form>
 
-                        {summaryResult.cool_facts && summaryResult.cool_facts.length > 0 && (
-                          <div>
-                            <h3 className="text-base font-semibold text-gray-900 mb-2">Cool Facts</h3>
-                            <ul className="list-disc list-inside space-y-1 text-sm sm:text-base text-gray-700">
-                              {summaryResult.cool_facts.map((fact, index) => (
-                                <li key={index}>{fact}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {summaryResult && !summaryResult.valid && (
-                      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                        <p className="text-sm sm:text-base text-yellow-800">
-                          {summaryResult.error || summaryResult.details || "Invalid response"}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+              {/* Results Section */}
+              {(summaryResult || error) && (
+                <div className="mt-8 bg-white rounded-lg border border-gray-200 p-4 sm:p-6 shadow-sm">
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Response</h2>
+                  <GitHubResponseDisplay response={summaryResult} error={error} />
+                </div>
+              )}
             </div>
           </main>
         </div>
