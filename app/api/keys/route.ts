@@ -79,13 +79,35 @@ export async function POST(request: NextRequest) {
     console.error("Error creating API key:", error);
     const errorDetails = error instanceof Error ? error.message : "Unknown error";
     const errorCode = (error as { code?: string })?.code || "UNKNOWN";
+    const errorHint = (error as { hint?: string })?.hint;
+    const errorPostgresCode = (error as { code?: string })?.code;
+    
+    // Map specific error codes to user-friendly messages
+    let statusCode = 500;
+    let userMessage = "Failed to create API key";
+    
+    if (errorCode === 'USER_NOT_FOUND') {
+      statusCode = 401;
+      userMessage = "Authentication error. Please sign in again.";
+    } else if (errorCode === 'DUPLICATE_NAME') {
+      statusCode = 409;
+      userMessage = "An API key with this name already exists.";
+    } else if (errorPostgresCode === '23503') {
+      statusCode = 400;
+      userMessage = "Invalid user. Please sign in again.";
+    } else if (errorPostgresCode === '23505') {
+      statusCode = 409;
+      userMessage = "An API key with this name already exists.";
+    }
+    
     return NextResponse.json(
       { 
-        error: "Failed to create API key",
+        error: userMessage,
         details: errorDetails,
-        code: errorCode
+        code: errorCode,
+        hint: errorHint
       },
-      { status: 500 }
+      { status: statusCode }
     );
   }
 }

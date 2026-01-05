@@ -107,6 +107,21 @@ export async function createKey(
   limit?: number | null
 ): Promise<ApiKey> {
   const supabase = await createClient();
+  
+  // First, verify the user exists in the database
+  const { data: user, error: userError } = await supabase
+    .from('users')
+    .select('id')
+    .eq('id', userId)
+    .single();
+  
+  if (userError || !user) {
+    console.error('User not found in database:', { userId, error: userError });
+    const error = new Error('User not found. Please sign in again.');
+    (error as any).code = 'USER_NOT_FOUND';
+    throw error;
+  }
+  
   // Build insert object
   const insertData: any = {
     name,
@@ -123,8 +138,8 @@ export async function createKey(
   }
 
   // Add limit if provided (null means unlimited, undefined means not set)
-  // Since "limit" is a reserved keyword in SQL, Supabase should handle quoting automatically
-  // But we need to ensure the value is properly set
+  // Since "limit" is a reserved keyword in SQL, we need to ensure Supabase handles it correctly
+  // Supabase should automatically quote reserved keywords, but we'll be explicit
   if (limit !== undefined) {
     // Explicitly set limit - null means unlimited, number means limited
     // Ensure it's a number or null, not undefined
@@ -132,15 +147,17 @@ export async function createKey(
   }
   
   console.log('Inserting API key with data:', { 
-    name: insertData.name, 
+    name: insertData.name,
+    userId: insertData.user_id,
     hasLimit: limit !== undefined, 
     limitValue: limit,
-    limitType: typeof limit 
+    limitType: typeof limit,
+    environment: insertData.environment
   });
 
   let data, error;
   
-  // First attempt: try with environment if provided
+  // First attempt: try with all fields
   const result = await supabase
     .from('api_keys')
     .insert(insertData)
@@ -166,13 +183,58 @@ export async function createKey(
     error = retryResult.error;
   }
 
+  // If error is related to limit column, try without it
+  if (error && (error.code === 'PGRST204' || error.message?.includes('limit'))) {
+    console.warn('Limit column issue detected, retrying without limit field');
+    const insertDataWithoutLimit = { ...insertData };
+    delete insertDataWithoutLimit.limit;
+    if (environment !== undefined) {
+      delete insertDataWithoutLimit.environment;
+    }
+    
+    const retryResult = await supabase
+      .from('api_keys')
+      .insert(insertDataWithoutLimit)
+      .select()
+      .single();
+      
+    data = retryResult.data;
+    error = retryResult.error;
+  }
+
   if (error) {
-    console.error('Error creating API key:', error);
+    console.error('Error creating API key:', {
+      error,
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      insertData: {
+        name: insertData.name,
+        hasUserId: !!insertData.user_id,
+        hasLimit: limit !== undefined,
+        hasEnvironment: environment !== undefined
+      }
+    });
+    
+    // Provide more specific error messages
+    if (error.code === '23503') {
+      // Foreign key violation
+      const errorMsg = new Error('User not found in database. Please sign in again.');
+      (errorMsg as any).code = 'USER_NOT_FOUND';
+      throw errorMsg;
+    } else if (error.code === '23505') {
+      // Unique constraint violation
+      const errorMsg = new Error('An API key with this name already exists.');
+      (errorMsg as any).code = 'DUPLICATE_NAME';
+      throw errorMsg;
+    }
+    
     throw error;
   }
 
   if (!data) {
-    throw new Error('Failed to create API key');
+    throw new Error('Failed to create API key: No data returned from database');
   }
 
   return rowToApiKey(data);
